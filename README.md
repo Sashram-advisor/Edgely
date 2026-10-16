@@ -1,2 +1,4 @@
-# Platform-NM
-learning platform, forntend, backend and documentation
+# Edgely
+Learn Smarter. Certify Faster.
+Your AI Certification Coach.
+The Intelligent Learning Edge.
