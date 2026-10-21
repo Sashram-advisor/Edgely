@@ -1,0 +1,706 @@
+-- Dummy seed data for the Agentic AI Certification Platform .
+
+BEGIN;
+
+INSERT INTO users (id, external_auth_id, address, display_name, date_of_birth, email, created_at, role) VALUES
+  (1, 'f621adf5-c9a4-5cf3-91b2-8d32f2be8cb7', 'New York', 'John', '1996-03-14', 'john@example.com', '2026-08-03 09:12:00', 'learner'),
+  (2, '7ab0560e-5dd0-5ee0-8515-b916cc9ce7df', 'Philadelphia', 'Nathan', '1991-11-02', 'nathan@example.com', '2026-08-10 14:30:00', 'learner'),
+  (3, 'fce2692c-72ae-5c36-8569-727704fe525c', NULL, 'Jane', '1998-07-21', 'jane@example.com', '2026-08-18 20:05:00', 'learner'),
+  (4, '22420e8c-ff49-5d96-a36a-cf77ece8e89f', 'Texas', 'Phil', NULL, 'phil@example.com', '2026-08-25 08:47:00', 'learner'),
+  (5, '0a3c982c-e101-5fa6-9ace-373b058e761c', 'California', 'Lily', '1993-01-30', 'lily@example.com', '2026-09-01 11:20:00', 'learner');
+
+INSERT INTO certifications (id, name, slug, description, is_active) VALUES
+  (1, 'AWS Certified Solutions Architect - Associate (SAA-C03)', 'aws-saa-c03', 'Validates the ability to design secure, resilient, high-performing and cost-optimized architectures on AWS.', true),
+  (2, 'Google Cloud Professional Cloud Architect', 'gcp-pca', 'Validates the ability to design, develop and manage robust, secure, scalable and dynamic solutions on Google Cloud.', true),
+  (3, 'Microsoft Azure AI Engineer Associate (AI-102)', 'azure-ai-102', 'Validates skills in building, managing and deploying AI solutions with Azure AI services, Azure AI Search and Azure OpenAI.', true),
+  (4, 'Microsoft Azure Administrator Associate (AZ-104)', 'azure-az-104', 'Validates skills in implementing, managing and monitoring identity, governance, storage, compute and networking in Azure.', true),
+  (5, 'HashiCorp Certified: Terraform Associate (003)', 'terraform-associate-003', 'Validates knowledge of infrastructure as code concepts and the core Terraform workflow, state and modules.', true),
+  (6, 'AWS Certified Data Analytics - Specialty (DAS-C01)', 'aws-das-c01', 'Retired by AWS in April 2024. Kept for learners'' historical records only.', false);
+
+INSERT INTO learner_profiles (user_id, target_certification_id, exam_date, weekly_study_hours, experience_level, goals) VALUES
+  (1, 1, '2026-11-28', 10, 'intermediate', '{"target_score": 800, "focus_areas": ["networking", "storage"], "preferred_study_time": "evening", "learning_style": "hands-on labs"}'),
+  (2, 2, '2026-12-12', 8, 'advanced', '{"focus_areas": ["case studies", "security"], "preferred_study_time": "weekend", "wants_mock_exams": true}'),
+  (3, 3, '2026-11-15', 12, 'intermediate', '{"focus_areas": ["generative AI", "knowledge mining"], "career_goal": "AI engineer", "language": "en"}'),
+  (4, 4, '2026-12-05', 6, 'beginner', '{"focus_areas": ["identity", "storage"], "preferred_study_time": "morning", "needs_explanations": "step by step"}'),
+  (5, 5, NULL, 5, 'intermediate', '{"focus_areas": ["state management", "modules"], "next_certification": "aws-saa-c03"}');
+
+INSERT INTO exam_domains (id, certification_id, parent_id, name, weight_percent) VALUES
+  (1, 1, NULL, 'Design Secure Architectures', '30.00'),
+  (2, 1, 1, 'Design secure access to AWS resources', NULL),
+  (3, 1, 1, 'Determine appropriate data security controls', NULL),
+  (4, 1, NULL, 'Design Resilient Architectures', '26.00'),
+  (5, 1, 4, 'Design highly available and fault-tolerant architectures', NULL),
+  (6, 1, NULL, 'Design High-Performing Architectures', '24.00'),
+  (7, 1, 6, 'Design high-performing and scalable network architectures', NULL),
+  (8, 1, 6, 'Determine high-performing storage solutions', NULL),
+  (9, 1, NULL, 'Design Cost-Optimized Architectures', '20.00'),
+  (10, 1, 9, 'Design cost-optimized storage solutions', NULL),
+  (11, 2, NULL, 'Designing and planning a cloud solution architecture', '24.00'),
+  (12, 2, 11, 'Designing network, storage and compute resources', NULL),
+  (13, 2, NULL, 'Managing and provisioning a solution infrastructure', '15.00'),
+  (14, 2, NULL, 'Designing for security and compliance', '18.00'),
+  (15, 2, 14, 'Designing for security (IAM, VPC Service Controls)', NULL),
+  (16, 2, NULL, 'Analyzing and optimizing technical and business processes', '18.00'),
+  (17, 2, NULL, 'Managing implementation', '11.00'),
+  (18, 2, NULL, 'Ensuring solution and operations excellence', '14.00'),
+  (19, 3, NULL, 'Plan and manage an Azure AI solution', '22.00'),
+  (20, 3, 19, 'Manage, monitor and secure an Azure AI service', NULL),
+  (21, 3, 19, 'Implement responsible AI (content safety)', NULL),
+  (22, 3, NULL, 'Implement generative AI solutions', '18.00'),
+  (23, 3, 22, 'Use your own data with Azure OpenAI (RAG)', NULL),
+  (24, 3, NULL, 'Implement an agentic solution', '8.00'),
+  (25, 3, NULL, 'Implement computer vision solutions', '14.00'),
+  (26, 3, NULL, 'Implement natural language processing solutions', '19.00'),
+  (27, 3, NULL, 'Implement knowledge mining and information extraction solutions', '19.00'),
+  (28, 3, 27, 'Implement an Azure AI Search solution', NULL),
+  (29, 4, NULL, 'Manage Azure identities and governance', '22.00'),
+  (30, 4, 29, 'Manage access to Azure resources (RBAC)', NULL),
+  (31, 4, 29, 'Manage Azure subscriptions and governance', NULL),
+  (32, 4, NULL, 'Implement and manage storage', '18.00'),
+  (33, 4, 32, 'Configure and manage storage accounts', NULL),
+  (34, 4, NULL, 'Deploy and manage Azure compute resources', '23.00'),
+  (35, 4, NULL, 'Implement and manage virtual networking', '22.00'),
+  (36, 4, NULL, 'Monitor and maintain Azure resources', '15.00'),
+  (37, 5, NULL, 'Understand Infrastructure as Code (IaC) concepts', NULL),
+  (38, 5, NULL, 'Understand Terraform basics', NULL),
+  (39, 5, NULL, 'Interact with Terraform modules', NULL),
+  (40, 5, NULL, 'Use the core Terraform workflow', NULL),
+  (41, 5, NULL, 'Implement and maintain state', NULL),
+  (42, 5, 41, 'Remote backends and state locking', NULL),
+  (43, 5, NULL, 'Understand HCP Terraform capabilities', NULL),
+  (44, 6, NULL, 'Collection', '18.00'),
+  (45, 6, NULL, 'Storage and Data Management', '22.00'),
+  (46, 6, NULL, 'Processing', '24.00'),
+  (47, 6, NULL, 'Analysis and Visualization', '18.00'),
+  (48, 6, NULL, 'Security', '18.00');
+
+INSERT INTO documents (id, certification_id, title, blob_path, status, uploaded_by, created_at) VALUES
+  (1, 1, 'AWS SAA-C03 Official Exam Guide', 'documents/aws-saa-c03/user-1/aws-saa-c03-exam-guide.pdf', 'ready', 1, '2026-08-04 10:00:00'),
+  (2, 1, 'S3 and Storage Deep Dive Notes', 'documents/aws-saa-c03/user-1/s3-storage-deep-dive.pdf', 'ready', 1, '2026-08-12 21:15:00'),
+  (3, 1, 'VPC Networking Cheat Sheet', 'documents/aws-saa-c03/user-1/vpc-networking-cheat-sheet.pdf', 'ready', 1, '2026-09-15 19:40:00'),
+  (4, 1, 'Well-Architected Framework - Reliability Pillar', 'documents/aws-saa-c03/user-1/well-architected-reliability.pdf', 'processing', 1, '2026-10-18 22:05:00'),
+  (5, 2, 'GCP Professional Cloud Architect Exam Guide', 'documents/gcp-pca/user-2/gcp-pca-exam-guide.pdf', 'ready', 2, '2026-08-11 09:00:00'),
+  (6, 2, 'Compute Options on Google Cloud', 'documents/gcp-pca/user-2/gcp-compute-options.pdf', 'ready', 2, '2026-08-20 13:25:00'),
+  (7, 2, 'Security Best Practices: IAM and VPC Service Controls', 'documents/gcp-pca/user-2/gcp-security-vpc-sc.pdf', 'ready', 2, '2026-09-28 16:10:00'),
+  (8, 3, 'AI-102 Study Guide', 'documents/azure-ai-102/user-3/ai-102-study-guide.pdf', 'ready', 3, '2026-08-19 08:30:00'),
+  (9, 3, 'Azure AI Search RAG Lab Notes', 'documents/azure-ai-102/user-3/azure-ai-search-rag-lab.pdf', 'ready', 3, '2026-09-05 20:50:00'),
+  (10, 3, 'Handwritten Notes - Computer Vision (scan)', 'documents/azure-ai-102/user-3/vision-notes-scan.pdf', 'failed', 3, '2026-10-10 23:02:00'),
+  (11, 4, 'AZ-104 Study Guide', 'documents/azure-az-104/user-4/az-104-study-guide.pdf', 'ready', 4, '2026-08-26 07:45:00'),
+  (12, 4, 'Azure Storage Redundancy Explained', 'documents/azure-az-104/user-4/azure-storage-redundancy.pdf', 'ready', 4, '2026-10-02 18:30:00'),
+  (13, 5, 'Terraform Associate (003) Study Guide', 'documents/terraform-associate-003/user-5/terraform-003-study-guide.pdf', 'ready', 5, '2026-09-02 12:00:00'),
+  (14, 5, 'Terraform State Management Notes', 'documents/terraform-associate-003/user-5/terraform-state-notes.pdf', 'ready', 5, '2026-09-12 21:30:00'),
+  (15, 5, 'HCP Terraform Workspaces Overview', 'documents/terraform-associate-003/user-5/hcp-terraform-workspaces.pdf', 'uploaded', 5, '2026-10-19 08:55:00');
+
+INSERT INTO document_chunks (id, document_id, chunk_index, content, metadata, exam_domain_id) VALUES
+  (1, 1, 0, 'The SAA-C03 exam has four domains: Design Secure Architectures (30%), Design Resilient Architectures (26%), Design High-Performing Architectures (24%) and Design Cost-Optimized Architectures (20%). The exam has 65 questions and a scaled passing score of 720 out of 1000.', '{"page": 2, "section": "Content outline", "token_count": 50}', 1),
+  (2, 1, 1, 'Apply the principle of least privilege with IAM policies and roles. Prefer IAM roles over long-term access keys for workloads running on EC2, Lambda and ECS. Use AWS Organizations service control policies (SCPs) to set permission guardrails across accounts.', '{"page": 4, "section": "Domain 1 - Secure access", "token_count": 52}', 2),
+  (3, 2, 0, 'S3 Standard is for frequently accessed data. S3 Standard-IA and S3 One Zone-IA are cheaper for infrequent access but charge a per-GB retrieval fee and have a 30-day minimum storage duration. S3 Intelligent-Tiering moves objects between access tiers automatically for a small monitoring fee per object.', '{"page": 3, "section": "S3 storage classes", "token_count": 61}', 10),
+  (4, 2, 1, 'S3 Lifecycle rules can transition objects to cheaper classes after a set number of days, for example Standard to Standard-IA after 30 days and to S3 Glacier Deep Archive after 180 days, and can expire objects or old noncurrent versions. Glacier Flexible Retrieval restores in minutes to hours; Deep Archive restores within 12 to 48 hours.', '{"page": 5, "section": "S3 Glacier and lifecycle rules", "token_count": 74}', 10),
+  (5, 2, 2, 'Amazon EBS is block storage attached to one EC2 instance in a single Availability Zone (io2 supports Multi-Attach). Amazon EFS is a managed NFS file system that many instances across AZs can mount at once. Amazon S3 is object storage accessed over HTTPS and is not a mountable file system.', '{"page": 8, "section": "EBS vs EFS vs S3", "token_count": 66}', 8),
+  (6, 3, 0, 'A NAT gateway lets instances in private subnets start outbound connections to the internet while blocking inbound connections. It lives in a public subnet in one AZ, so for high availability deploy one NAT gateway per AZ. You pay per hour and per GB processed.', '{"page": 1, "section": "NAT gateway", "token_count": 60}', 7),
+  (7, 3, 1, 'Gateway VPC endpoints support only Amazon S3 and DynamoDB, are added as route table targets and have no extra charge. Interface endpoints (AWS PrivateLink) create ENIs with private IPs in your subnets, support many AWS services and are billed per hour and per GB. Using endpoints keeps traffic off the internet and can remove NAT gateway data charges.', '{"page": 2, "section": "VPC endpoints", "token_count": 77}', 7),
+  (8, 3, 2, 'Security groups are stateful and attached to ENIs; they support allow rules only. Network ACLs are stateless, apply at the subnet level, support both allow and deny rules and are evaluated in rule-number order, so return traffic must be allowed explicitly.', '{"page": 3, "section": "Security groups vs network ACLs", "token_count": 54}', 2),
+  (9, 5, 0, 'The Professional Cloud Architect exam covers six sections, from designing and planning a solution architecture to ensuring solution and operations excellence. Several questions are based on published case studies such as EHR Healthcare, Helicopter Racing League, Mountkirk Games and TerramEarth.', '{"page": 2, "section": "Exam sections", "token_count": 53}', 11),
+  (10, 5, 1, 'For case study questions, map each business requirement (cost, time to market, compliance) and technical requirement (latency, availability, data residency) to a service choice. The best answer usually meets the stated requirements with the most managed option, not the most powerful one.', '{"page": 6, "section": "Using the case studies", "token_count": 56}', 16),
+  (11, 6, 0, 'Compute Engine gives full control of VMs, custom machine types, GPUs and Spot VMs. Choose it for lift-and-shift migrations, licensed software tied to the OS, or workloads that need kernel-level access. Managed instance groups add autoscaling and autohealing.', '{"page": 1, "section": "Compute Engine", "token_count": 50}', 12),
+  (12, 6, 1, 'GKE runs containerized workloads on managed Kubernetes. Autopilot mode manages nodes and bills per pod resource request; Standard mode gives control over node pools. Choose GKE for many microservices, stateful sets, or when the team already uses Kubernetes tooling.', '{"page": 3, "section": "Google Kubernetes Engine", "token_count": 52}', 12),
+  (13, 6, 2, 'Cloud Run runs stateless containers that respond to HTTP requests or events, scales to zero and bills per request time. It suits APIs and web apps with spiky traffic and teams that do not want to manage clusters. Request timeouts and the stateless model make it a poor fit for long-running stateful services.', '{"page": 5, "section": "Cloud Run", "token_count": 70}', 12),
+  (14, 7, 0, 'VPC Service Controls create a service perimeter around Google-managed services such as Cloud Storage and BigQuery to reduce data exfiltration risk. Requests from outside the perimeter are blocked even with valid IAM credentials. Access levels and ingress/egress rules allow approved exceptions; use dry-run mode before enforcing.', '{"page": 2, "section": "VPC Service Controls", "token_count": 61}', 15),
+  (15, 7, 1, 'Grant predefined roles to groups at the lowest practical level of the resource hierarchy instead of basic roles like Owner or Editor. Use service accounts for workloads and avoid downloaded keys where Workload Identity Federation is possible. Organization policy constraints, such as restricting resource locations, enforce guardrails across projects.', '{"page": 4, "section": "IAM and organization policies", "token_count": 65}', 15),
+  (16, 8, 0, 'AI-102 measures six areas: planning and managing an Azure AI solution, generative AI, agentic solutions, computer vision, natural language processing, and knowledge mining and information extraction. Expect scenario questions that ask which Azure AI service and which SDK call fits a requirement.', '{"page": 1, "section": "Skills measured", "token_count": 56}', 19),
+  (17, 8, 1, 'Azure AI services accept either a subscription key or a Microsoft Entra ID token. Managed identity with role assignments such as Cognitive Services User avoids storing secrets in code. If keys are used, keep them in Azure Key Vault and rotate them with the two-key pattern: regenerate key 2, switch the app, then regenerate key 1.', '{"page": 4, "section": "Authentication to Azure AI services", "token_count": 74}', 20),
+  (18, 8, 2, 'Azure AI Content Safety detects harmful text and images in four categories: hate, sexual, violence and self-harm, each with a severity level. Prompt Shields detect jailbreak and indirect prompt injection attacks. Content filters on Azure OpenAI deployments use the same categories and can be configured per deployment.', '{"page": 6, "section": "Azure AI Content Safety", "token_count": 62}', 21),
+  (19, 9, 0, 'An Azure AI Search index defines fields and their attributes (searchable, filterable, retrievable). For vector search, add a vector field with dimensions that match the embedding model, for example 1536 for text-embedding-3-small, and configure an HNSW vector profile. Indexers can pull data from Blob Storage and run skillsets during ingestion.', '{"page": 1, "section": "Indexes and vector search", "token_count": 66}', 28),
+  (20, 9, 1, 'Hybrid search runs a keyword (BM25) query and a vector query in parallel and merges the results with Reciprocal Rank Fusion. The semantic ranker then re-scores the top results with a language model and can return captions and answers. Hybrid plus semantic ranking usually gives the best retrieval quality for RAG.', '{"page": 3, "section": "Hybrid search and semantic ranker", "token_count": 68}', 28),
+  (21, 9, 2, 'In a RAG pattern the app retrieves relevant chunks from Azure AI Search and passes them to the chat completion model as grounding context. Chunk documents into passages of a few hundred tokens with some overlap, store the source URL as metadata, and instruct the model to cite sources and answer only from the provided context.', '{"page": 5, "section": "Grounding Azure OpenAI with your data", "token_count": 74}', 23),
+  (22, 11, 0, 'Azure role-based access control assigns a role definition to a security principal at a scope: management group, subscription, resource group or resource. Built-in roles include Owner, Contributor, Reader and User Access Administrator. Assignments are inherited by child scopes, and deny assignments override allows.', '{"page": 3, "section": "Azure RBAC", "token_count": 57}', 30),
+  (23, 11, 1, 'Microsoft Entra roles, such as Global Administrator and User Administrator, control directory objects like users, groups and app registrations. Azure roles control Azure resources. They are separate systems; a Global Administrator can elevate access to get User Access Administrator at root scope, but does not manage resources by default.', '{"page": 4, "section": "Microsoft Entra roles vs Azure roles", "token_count": 65}', 30),
+  (24, 11, 2, 'Management groups organize subscriptions into a hierarchy up to six levels deep below the root. Azure Policy assignments at a management group apply to all child subscriptions and can deny, audit or modify non-compliant resources, for example allowed locations or required tags.', '{"page": 6, "section": "Management groups and Azure Policy", "token_count": 56}', 31),
+  (25, 12, 0, 'Locally redundant storage (LRS) keeps three copies in one datacenter and is the cheapest option. Zone-redundant storage (ZRS) keeps three copies across three availability zones in the primary region, so data stays available if one zone fails.', '{"page": 1, "section": "LRS and ZRS", "token_count": 49}', 33),
+  (26, 12, 1, 'Geo-redundant storage (GRS) copies data asynchronously to a secondary region; GZRS combines ZRS in the primary region with geo-replication. The secondary is readable only with RA-GRS or RA-GZRS. Without read access, data in the secondary is available only after a failover.', '{"page": 2, "section": "GRS, GZRS and read access", "token_count": 54}', 33),
+  (27, 13, 0, 'The core Terraform workflow is write, plan and apply. terraform init downloads providers and modules and configures the backend; terraform plan shows the proposed changes; terraform apply makes them; terraform destroy removes all managed resources. terraform fmt and terraform validate check style and syntax.', '{"page": 2, "section": "Core workflow", "token_count": 58}', 40),
+  (28, 13, 1, 'Terraform state maps resources in the configuration to real objects, stores metadata such as dependencies, and caches attribute values to improve performance. State can contain secrets in plain text, so it must be stored securely and never committed to version control.', '{"page": 5, "section": "Purpose of state", "token_count": 54}', 41),
+  (29, 14, 0, 'Remote backends such as S3, azurerm, gcs or HCP Terraform let a team share one state file. State locking stops two runs from writing the state at the same time. With the S3 backend, locking used a DynamoDB table; since Terraform 1.10 it can use S3 native locking with use_lockfile = true. terraform force-unlock removes a stuck lock.', '{"page": 1, "section": "Remote backends and locking", "token_count": 77}', 42),
+  (30, 14, 1, 'terraform state list shows tracked resources, terraform state show prints one resource, terraform state mv renames or moves an address, and terraform state rm stops tracking a resource without destroying it. Import blocks or terraform import bring existing infrastructure under management. Prefer moved blocks over state mv for refactors.', '{"page": 4, "section": "State commands", "token_count": 65}', 41);
+
+INSERT INTO conversations (id, user_id, certification_id, title, created_at) VALUES
+  (1, 1, 1, 'S3 storage classes vs lifecycle policies', '2026-09-02 20:10:00'),
+  (2, 1, 1, 'VPC design: NAT gateway vs VPC endpoints', '2026-09-20 21:30:00'),
+  (3, 1, NULL, 'My 6-week study plan', '2026-10-01 07:45:00'),
+  (4, 2, 2, 'Cloud Run vs GKE vs Compute Engine', '2026-09-10 10:05:00'),
+  (5, 2, 2, 'VPC Service Controls for BigQuery', '2026-10-05 19:20:00'),
+  (6, 3, 3, 'RAG with Azure AI Search and Azure OpenAI', '2026-09-15 22:00:00'),
+  (7, 3, 3, 'Keys vs managed identity for Azure AI services', '2026-10-08 21:15:00'),
+  (8, 4, 4, 'Azure RBAC vs Microsoft Entra roles', '2026-09-25 06:50:00'),
+  (9, 4, 4, 'Storage account redundancy options', '2026-10-12 07:10:00'),
+  (10, 5, 5, 'Remote state and state locking', '2026-09-18 20:40:00'),
+  (11, 5, 1, 'Preparing for SAA-C03 after Terraform', '2026-10-14 21:00:00');
+
+INSERT INTO messages (id, conversation_id, role, content, model, tokens_in, tokens_out, created_at) VALUES
+  (1, 1, 'system', 'You are an AI certification tutor for AWS Certified Solutions Architect - Associate (SAA-C03). Answer using the retrieved study material, cite your sources, and say when the material does not cover a question.', NULL, NULL, NULL, '2026-09-02 20:10:00'),
+  (2, 1, 'user', 'I have log files that are read a lot in the first month and almost never after that. Which S3 storage class should I use?', NULL, NULL, NULL, '2026-09-02 20:11:00'),
+  (3, 1, 'assistant', 'Keep new logs in S3 Standard while they are read often, then move them to cheaper classes with a lifecycle rule instead of picking one class up front. Standard-IA is cheaper for infrequent access but has a retrieval fee and a 30-day minimum storage duration, so it fits data older than 30 days.', 'claude-sonnet-5-5', 1840, 212, '2026-09-02 20:11:09'),
+  (4, 1, 'user', 'And if we must keep them for 7 years for compliance but almost never read them?', NULL, NULL, NULL, '2026-09-02 20:14:09'),
+  (5, 1, 'assistant', 'Add a lifecycle transition to S3 Glacier Deep Archive, for example after 180 days, and an expiration action at 7 years. Deep Archive is the cheapest class; the trade-off is that a restore takes 12 to 48 hours, which is usually fine for compliance archives. On the exam, ''rarely accessed'' plus ''retrieval within 12 hours is acceptable'' points to Deep Archive.', 'claude-sonnet-5-5', 2310, 268, '2026-09-02 20:14:18'),
+  (6, 2, 'system', 'You are an AI certification tutor for AWS Certified Solutions Architect - Associate (SAA-C03). Answer using the retrieved study material, cite your sources, and say when the material does not cover a question.', NULL, NULL, NULL, '2026-09-20 21:30:00'),
+  (7, 2, 'user', 'My private EC2 instances only need to reach S3. Do I still need a NAT gateway?', NULL, NULL, NULL, '2026-09-20 21:31:00'),
+  (8, 2, 'assistant', 'No. A gateway VPC endpoint for S3 is added as a route table target, keeps the traffic on the AWS network and has no extra charge. A NAT gateway is only needed if the instances must reach other internet destinations, and it is billed per hour and per GB.', 'claude-sonnet-5-5', 2050, 198, '2026-09-20 21:31:09'),
+  (9, 2, 'user', 'What if the NAT gateway''s AZ goes down?', NULL, NULL, NULL, '2026-09-20 21:34:09'),
+  (10, 2, 'assistant', 'A NAT gateway lives in one AZ, so instances in other AZs lose outbound access if they route through it. The resilient design is one NAT gateway per AZ, with each private subnet''s route table pointing to the NAT gateway in its own AZ.', 'claude-sonnet-5-5', 1920, 154, '2026-09-20 21:34:18'),
+  (11, 2, 'user', 'Quick one: are network ACLs stateful?', NULL, NULL, NULL, '2026-09-20 21:37:18'),
+  (12, 2, 'assistant', 'No. Network ACLs are stateless, so you must allow the return traffic (usually ephemeral ports 1024-65535) explicitly. Security groups are stateful and only have allow rules.', 'claude-haiku-4-5', 1210, 88, '2026-09-20 21:37:27'),
+  (13, 3, 'system', 'You are an AI certification tutor. Use the learner profile to give personalised study advice.', NULL, NULL, NULL, '2026-10-01 07:45:00'),
+  (14, 3, 'user', 'My exam is on 28 November and I can study about 10 hours a week. Can you make me a plan?', NULL, NULL, NULL, '2026-10-01 07:46:00'),
+  (15, 3, 'assistant', 'You have about 8 weeks and 80 hours. Suggested split by exam weight: weeks 1-2 Secure Architectures (30%), weeks 3-4 Resilient Architectures (26%), week 5 High-Performing Architectures (24%), week 6 Cost-Optimized Architectures (20%), and weeks 7-8 two full mock exams plus review of weak domains. Keep about 3 of the 10 weekly hours for hands-on labs, since that is your preferred learning style.', 'claude-haiku-4-5', 980, 241, '2026-10-01 07:46:09'),
+  (16, 4, 'system', 'You are an AI certification tutor for Google Cloud Professional Cloud Architect. Answer using the retrieved study material, cite your sources, and say when the material does not cover a question.', NULL, NULL, NULL, '2026-09-10 10:05:00'),
+  (17, 4, 'user', 'For a stateless REST API with very spiky traffic, which compute option should I pick on the PCA exam?', NULL, NULL, NULL, '2026-09-10 10:06:00'),
+  (18, 4, 'assistant', 'Cloud Run. It runs stateless containers, scales to zero and bills per request time, which matches spiky traffic with no cluster to manage. Choose GKE when you have many microservices or need Kubernetes features, and Compute Engine for lift-and-shift or OS-level control.', 'claude-sonnet-5-5', 2140, 176, '2026-09-10 10:06:09'),
+  (19, 4, 'user', 'And for a legacy app that needs a specific licensed OS image?', NULL, NULL, NULL, '2026-09-10 10:09:09'),
+  (20, 4, 'assistant', 'Compute Engine, ideally in a managed instance group for autoscaling and autohealing. Licensed software tied to the OS and kernel-level access are the classic signals for VMs rather than containers.', 'claude-sonnet-5-5', 1760, 121, '2026-09-10 10:09:18'),
+  (21, 5, 'system', 'You are an AI certification tutor for Google Cloud Professional Cloud Architect. Answer using the retrieved study material, cite your sources, and say when the material does not cover a question.', NULL, NULL, NULL, '2026-10-05 19:20:00'),
+  (22, 5, 'user', 'A case study asks how to stop data in BigQuery from being copied to a project outside the company, even by users with valid credentials. IAM is not enough?', NULL, NULL, NULL, '2026-10-05 19:21:00'),
+  (23, 5, 'assistant', 'Right, IAM controls who can act but not where the data can go. VPC Service Controls put a service perimeter around BigQuery and Cloud Storage, so requests from outside the perimeter are blocked even with valid IAM credentials. Start in dry-run mode to see what would be blocked before enforcing.', 'claude-sonnet-5-5', 2420, 189, '2026-10-05 19:21:09'),
+  (24, 5, 'user', 'How do I combine that with least privilege?', NULL, NULL, NULL, '2026-10-05 19:24:09'),
+  (25, 5, 'assistant', 'Use both layers: grant predefined roles to groups at the lowest practical level of the resource hierarchy, avoid basic roles such as Editor, and use service accounts with Workload Identity Federation instead of key files. Add organization policy constraints, such as allowed resource locations, for compliance requirements in the case study.', 'claude-sonnet-5-5', 2610, 214, '2026-10-05 19:24:18'),
+  (26, 6, 'system', 'You are an AI certification tutor for Microsoft Azure AI Engineer Associate (AI-102). Answer using the retrieved study material, cite your sources, and say when the material does not cover a question.', NULL, NULL, NULL, '2026-09-15 22:00:00'),
+  (27, 6, 'user', 'How should I set up the index for a RAG chatbot over our PDFs?', NULL, NULL, NULL, '2026-09-15 22:01:00'),
+  (28, 6, 'assistant', 'Create an index with a searchable text field for the chunk content, filterable metadata fields, and a vector field whose dimensions match your embedding model (1536 for text-embedding-3-small) with an HNSW profile. An indexer can pull the PDFs from Blob Storage and run a skillset to chunk and embed them during ingestion.', 'claude-sonnet-5-5', 2380, 233, '2026-09-15 22:01:09'),
+  (29, 6, 'user', 'Should I use pure vector search?', NULL, NULL, NULL, '2026-09-15 22:04:09'),
+  (30, 6, 'assistant', 'Usually not. Hybrid search runs BM25 and vector queries together and merges them with Reciprocal Rank Fusion, which handles exact terms like product codes better than vectors alone. Turning on the semantic ranker on top gives the best relevance for RAG.', 'claude-sonnet-5-5', 2050, 167, '2026-09-15 22:04:18'),
+  (31, 6, 'user', 'How do I stop the model from making things up?', NULL, NULL, NULL, '2026-09-15 22:07:18'),
+  (32, 6, 'assistant', 'Pass only the retrieved chunks as grounding context and instruct the model to answer only from that context and cite the source of each claim. Keep chunks to a few hundred tokens with some overlap, and store the source URL as metadata so citations can link back to the document.', 'claude-sonnet-5-5', 2290, 181, '2026-09-15 22:07:27'),
+  (33, 7, 'system', 'You are an AI certification tutor for Microsoft Azure AI Engineer Associate (AI-102). Answer using the retrieved study material, cite your sources, and say when the material does not cover a question.', NULL, NULL, NULL, '2026-10-08 21:15:00'),
+  (34, 7, 'user', 'Our app calls Azure AI Language with a key stored in appsettings.json. What would the exam say is the better approach?', NULL, NULL, NULL, '2026-10-08 21:16:00'),
+  (35, 7, 'assistant', 'Use a managed identity for the app and assign it the Cognitive Services User role, so it authenticates with a Microsoft Entra ID token and there is no secret in code. If you must keep keys, store them in Azure Key Vault.', 'claude-sonnet-5-5', 1890, 142, '2026-10-08 21:16:09'),
+  (36, 7, 'user', 'How do I rotate the keys without downtime?', NULL, NULL, NULL, '2026-10-08 21:19:09'),
+  (37, 7, 'assistant', 'Use the two-key pattern: regenerate key 2, switch the app to key 2, then regenerate key 1. The app always has one valid key during the change.', 'claude-haiku-4-5', 1320, 74, '2026-10-08 21:19:18'),
+  (38, 7, 'user', 'Is Prompt Shields part of the same service?', NULL, NULL, NULL, '2026-10-08 21:22:18'),
+  (39, 7, 'assistant', 'Prompt Shields is a feature of Azure AI Content Safety. It detects jailbreak attempts and indirect prompt injection, alongside the harm categories hate, sexual, violence and self-harm.', 'claude-haiku-4-5', 1405, 69, '2026-10-08 21:22:27'),
+  (40, 8, 'system', 'You are an AI certification tutor for Microsoft Azure Administrator Associate (AZ-104). Answer using the retrieved study material, cite your sources, and say when the material does not cover a question.', NULL, NULL, NULL, '2026-09-25 06:50:00'),
+  (41, 8, 'user', 'I''m confused. If I''m a Global Administrator, can I delete virtual machines?', NULL, NULL, NULL, '2026-09-25 06:51:00'),
+  (42, 8, 'assistant', 'Not by default. Global Administrator is a Microsoft Entra role, which controls directory objects like users and groups. Deleting VMs needs an Azure RBAC role such as Contributor on the right scope. A Global Administrator can elevate access to get User Access Administrator at root scope and then assign themselves a role, but that is a separate, deliberate step.', 'claude-sonnet-5-5', 2160, 204, '2026-09-25 06:51:09'),
+  (43, 8, 'user', 'If I assign Reader at the subscription, does it apply to resource groups too?', NULL, NULL, NULL, '2026-09-25 06:54:09'),
+  (44, 8, 'assistant', 'Yes. RBAC assignments are inherited by child scopes, so Reader at the subscription applies to every resource group and resource in it. The only thing that overrides an allow is a deny assignment.', 'claude-haiku-4-5', 1280, 81, '2026-09-25 06:54:18'),
+  (45, 9, 'system', 'You are an AI certification tutor for Microsoft Azure Administrator Associate (AZ-104). Answer using the retrieved study material, cite your sources, and say when the material does not cover a question.', NULL, NULL, NULL, '2026-10-12 07:10:00'),
+  (46, 9, 'user', 'What is the difference between ZRS and GRS?', NULL, NULL, NULL, '2026-10-12 07:11:00'),
+  (47, 9, 'assistant', 'ZRS keeps three copies across three availability zones in one region, protecting against a zone failure. GRS keeps three copies in one datacenter (LRS) and copies them asynchronously to a secondary region, protecting against a regional outage.', 'claude-sonnet-5-5', 1730, 132, '2026-10-12 07:11:09'),
+  (48, 9, 'user', 'Can I read from the secondary region with GRS?', NULL, NULL, NULL, '2026-10-12 07:14:09'),
+  (49, 9, 'assistant', 'Only with RA-GRS or RA-GZRS. With plain GRS the secondary copy is not readable until a failover happens.', 'claude-haiku-4-5', 1150, 52, '2026-10-12 07:14:18'),
+  (50, 10, 'system', 'You are an AI certification tutor for HashiCorp Certified: Terraform Associate (003). Answer using the retrieved study material, cite your sources, and say when the material does not cover a question.', NULL, NULL, NULL, '2026-09-18 20:40:00'),
+  (51, 10, 'user', 'Two people on my team ran terraform apply at the same time and the state got corrupted. How do we prevent that?', NULL, NULL, NULL, '2026-09-18 20:41:00'),
+  (52, 10, 'assistant', 'Move the state to a remote backend that supports locking. With the S3 backend you can set use_lockfile = true (Terraform 1.10 and later) or use the older DynamoDB table lock; azurerm, gcs and HCP Terraform lock automatically. Then a second run waits or fails instead of writing at the same time.', 'claude-sonnet-5-5', 2080, 187, '2026-09-18 20:41:09'),
+  (53, 10, 'user', 'A run crashed and now the lock is stuck. What do I do?', NULL, NULL, NULL, '2026-09-18 20:44:09'),
+  (54, 10, 'assistant', 'First make sure no other run is actually active, then run terraform force-unlock with the lock ID shown in the error message. Never delete the lock by hand while a run might still be writing.', 'claude-haiku-4-5', 1240, 77, '2026-09-18 20:44:18'),
+  (55, 10, 'user', 'How do I rename a resource without destroying it?', NULL, NULL, NULL, '2026-09-18 20:47:18'),
+  (56, 10, 'assistant', 'Add a moved block from the old address to the new one and run plan; Terraform will update the state without recreating the resource. terraform state mv also works, but moved blocks are reviewable in code and are the recommended way to refactor.', 'claude-sonnet-5-5', 1690, 118, '2026-09-18 20:47:27'),
+  (57, 11, 'system', 'You are an AI certification tutor for AWS Certified Solutions Architect - Associate (SAA-C03). Answer using the retrieved study material, cite your sources, and say when the material does not cover a question.', NULL, NULL, NULL, '2026-10-14 21:00:00'),
+  (58, 11, 'user', 'After Terraform I want to take SAA-C03. Which networking topics should I focus on?', NULL, NULL, NULL, '2026-10-14 21:01:00'),
+  (59, 11, 'assistant', 'Focus on the VPC basics that show up most: when to use a NAT gateway versus VPC endpoints, and the difference between security groups (stateful) and network ACLs (stateless). Networking design is part of Design High-Performing Architectures, which is 24% of the exam.', 'claude-sonnet-5-5', 2270, 162, '2026-10-14 21:01:09');
+
+INSERT INTO message_citations (message_id, chunk_id) VALUES
+  (3, 3),
+  (5, 4),
+  (5, 3),
+  (8, 7),
+  (8, 6),
+  (10, 6),
+  (12, 8),
+  (18, 13),
+  (18, 12),
+  (20, 11),
+  (23, 14),
+  (25, 15),
+  (25, 10),
+  (28, 19),
+  (28, 21),
+  (30, 20),
+  (32, 21),
+  (35, 17),
+  (37, 17),
+  (39, 18),
+  (42, 23),
+  (42, 22),
+  (44, 22),
+  (47, 25),
+  (47, 26),
+  (49, 26),
+  (52, 29),
+  (52, 28),
+  (54, 29),
+  (56, 30),
+  (59, 6),
+  (59, 8),
+  (59, 1);
+
+-- Move identity/serial sequences past the explicit ids used above.
+SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT MAX(id) FROM users));
+SELECT setval(pg_get_serial_sequence('certifications', 'id'), (SELECT MAX(id) FROM certifications));
+SELECT setval(pg_get_serial_sequence('exam_domains', 'id'), (SELECT MAX(id) FROM exam_domains));
+SELECT setval(pg_get_serial_sequence('documents', 'id'), (SELECT MAX(id) FROM documents));
+SELECT setval(pg_get_serial_sequence('document_chunks', 'id'), (SELECT MAX(id) FROM document_chunks));
+SELECT setval(pg_get_serial_sequence('conversations', 'id'), (SELECT MAX(id) FROM conversations));
+SELECT setval(pg_get_serial_sequence('messages', 'id'), (SELECT MAX(id) FROM messages));
+
+COMMIT;
+-- Enrollments seed for seed_1.sql (John, Nathan, Jane, Phil, Lily).
+-- Run order: schema (with enrollments table) -> seed_1.sql -> this file.
+-- Do NOT run together with the original 001_ai_tutor.sql / 002_enrollments.sql: their ids overlap with seed_1.sql.
+-- Use 003_ai_tutor_offset.sql and 004_enrollments_offset.sql (ids +100) to add Maya to the same database.
+--
+-- One enrollment per learner_profiles row, taken from that row's target certification,
+-- exam_date, weekly_study_hours and goals. Lily also gets a second, open enrollment
+-- (SAA-C03) because her profile goals name it as the next certification and
+-- conversation 11 is about preparing for it. Her 5 weekly hours are split 3 + 2.
+
+BEGIN;
+
+INSERT INTO enrollments (
+	id, user_id, certification_id, goal, deadline, weekly_study_hours, status, created_at
+) VALUES
+	(1, 1, 1, 'Pass AWS Solutions Architect - Associate (SAA-C03) with a target score of 800. Focus on networking and storage, using hands-on labs.', '2026-11-28', 10.00, 'active', '2026-08-04 10:00:00'),
+	(2, 2, 2, 'Pass Google Cloud Professional Cloud Architect. Focus on case studies and security, with mock exams.', '2026-12-12', 8.00, 'active', '2026-08-11 09:00:00'),
+	(3, 3, 3, 'Pass Azure AI Engineer Associate (AI-102). Focus on generative AI and knowledge mining toward an AI engineer career.', '2026-11-15', 12.00, 'active', '2026-08-19 08:30:00'),
+	(4, 4, 4, 'Pass Azure Administrator Associate (AZ-104). Focus on identity and storage, with step-by-step explanations.', '2026-12-05', 6.00, 'active', '2026-08-26 07:45:00'),
+	(5, 5, 5, 'Pass HashiCorp Terraform Associate (003). Focus on state management and modules.', NULL, 3.00, 'active', '2026-09-02 12:00:00'),
+	(6, 5, 1, 'After Terraform, prepare for AWS Solutions Architect - Associate (SAA-C03). Start with networking topics.', NULL, 2.00, 'active', '2026-10-14 21:00:00');
+
+SELECT setval(pg_get_serial_sequence('enrollments', 'id'), (SELECT MAX(id) FROM enrollments));
+
+COMMIT;
+-- AI Tutor demo data (Maya Chen, AWS Cloud Practitioner), generated from 001_ai_tutor.sql with every id and
+-- foreign-key id shifted by +100, so it can live in the same database as seed_1.sql (ids 1-48).
+-- Maya = user 101, content admin = user 102, Cloud Practitioner = certification 101.
+-- Row content is unchanged. Run after seed_1.sql and 002_enrollments_seed1.sql.
+
+BEGIN;
+
+INSERT INTO users (id, external_auth_id, address, display_name, date_of_birth, email, created_at, role) VALUES
+  (101, 'seed-learner-maya-chen', 'Austin, TX', 'Maya Chen', '1998-04-12', 'maya.chen@example.com', '2026-10-01 09:00:00', 'learner'),
+  (102, 'seed-admin-content', NULL, 'Platform Content', NULL, 'content@example.com', '2026-09-15 09:00:00', 'admin');
+
+INSERT INTO certifications (id, name, slug, description, is_active) VALUES
+  (101, 'AWS Certified Cloud Practitioner', 'aws-certified-cloud-practitioner', 'Foundational certification on AWS cloud concepts, security, and billing. The tutor demo covers the shared responsibility model.', TRUE);
+
+INSERT INTO learner_profiles (user_id, target_certification_id, exam_date, weekly_study_hours, experience_level, goals) VALUES
+  (101, 101, '2026-12-15', 6, 'intermediate', '{
+		"preferred_explanation_level": "intermediate",
+		"stories": [
+			"ask certification-related questions",
+			"receive explanations at beginner, intermediate, and advanced levels",
+			"receive real-world examples",
+			"be quizzed after learning a concept",
+			"have the tutor remember previous interactions"
+		]
+	}'::jsonb);
+
+INSERT INTO exam_domains (id, certification_id, parent_id, name, weight_percent) VALUES
+  (101, 101, NULL, 'Cloud Concepts', 24.00);
+
+INSERT INTO exam_domains (id, certification_id, parent_id, name, weight_percent) VALUES
+  (102, 101, 101, 'Shared Responsibility Model', 8.00);
+
+INSERT INTO documents (id, certification_id, title, blob_path, status, uploaded_by, created_at) VALUES
+  (101, 101, 'Cloud Practitioner study guide: shared responsibility', 'seed/aws-cloud-practitioner/shared-responsibility.md', 'ready', 102, '2026-10-10 11:00:00');
+
+INSERT INTO document_chunks (id, document_id, chunk_index, content, metadata, exam_domain_id) VALUES
+  (101, 101, 0, 'The shared responsibility model divides security between AWS and the customer. AWS is responsible for security of the cloud: physical facilities, hardware, the global network, and the managed infrastructure under services such as Amazon S3 and managed databases. The customer is responsible for security in the cloud: their data, identity and access management, encryption choices, and service configuration such as S3 bucket policies, public-access blocks, and CloudTrail trails. Exam questions usually name one control and ask who owns it.', '{"concept": "shared-responsibility-model", "used_for": ["certification-question", "explanation-levels", "quiz"]}'::jsonb, 102),
+  (102, 101, 1, 'Example: a clinic stores patient intake forms in Amazon S3. AWS secures the data centers, the hardware, and the S3 service. The clinic must encrypt the forms, block public access, and choose which staff roles can read them. If the bucket is left public, that misconfiguration is the clinic''s responsibility, not AWS''s. Patching the hypervisor under a managed database used by the same clinic remains AWS''s responsibility.', '{"concept": "shared-responsibility-model", "used_for": ["real-world-example", "quiz-scenario"]}'::jsonb, 102);
+
+INSERT INTO conversations (id, user_id, certification_id, title, created_at) VALUES
+  (101, 101, 101, 'Shared responsibility model', '2026-10-18 14:00:00'),
+  (102, 101, 101, 'Review yesterday''s quiz', '2026-10-19 09:00:00');
+
+INSERT INTO messages (id, conversation_id, role, content, model, tokens_in, tokens_out, created_at) VALUES
+  (101, 101, 'user', 'I am studying for the Cloud Practitioner exam. What is the shared responsibility model, and which part of it shows up on the exam?', NULL, 28, NULL, '2026-10-18 14:00:00'),
+  (102, 101, 'assistant', 'The shared responsibility model splits security between AWS and you. AWS handles security of the cloud: the data centers, hardware, network, and the infrastructure under managed services. You handle security in the cloud: your data, who can access it, and how you configure services such as S3 bucket policies and CloudTrail. On this exam, a question usually names one control and asks who owns it, rather than asking you to recite the definition.', 'tutor', 28, 92, '2026-10-18 14:00:20'),
+  (103, 101, 'user', 'Explain that at a beginner level.', NULL, 8, NULL, '2026-10-18 14:01:00'),
+  (104, 101, 'assistant', 'Picture AWS as the owner of an apartment building. AWS owns the building, the front-door locks, and the electricity. You own what you put in the apartment and whether you lock your own door. If a question asks who protects the physical data center, the answer is AWS. If it asks who decides who can open a bucket, the answer is you.', 'tutor', 8, 78, '2026-10-18 14:01:20'),
+  (105, 101, 'user', 'Now explain the same idea at an advanced level, the way a longer scenario question would.', NULL, 22, NULL, '2026-10-18 14:02:00'),
+  (106, 101, 'assistant', 'Split the scenario into separate controls instead of picking one owner for the whole sentence. A company turns on CloudTrail, writes an S3 bucket policy, and asks who patches the hypervisor under a managed database. The hypervisor patch is AWS, because that is security of the cloud. The CloudTrail trail and the bucket policy are yours, because those are configuration in the cloud. The exam item is testing whether you can assign each control, not whether you recognize the topic name.', 'tutor', 22, 110, '2026-10-18 14:02:25'),
+  (107, 101, 'user', 'Give me a real-world example.', NULL, 8, NULL, '2026-10-18 14:03:00'),
+  (108, 101, 'assistant', 'You asked first what the exam expects, then for a beginner version. Here is the workplace version of that same split. A clinic moves patient intake forms to S3. AWS secures the buildings, the hardware, and the S3 service. The clinic still has to encrypt the files, block public access, and decide which staff roles can read the forms. If the clinic leaves the bucket public, that mistake belongs to the clinic. Patching the hypervisor under the clinic''s managed database still belongs to AWS.', 'tutor', 8, 118, '2026-10-18 14:03:25'),
+  (109, 101, 'user', 'Quiz me on this concept.', NULL, 7, NULL, '2026-10-18 14:04:00'),
+  (110, 101, 'assistant', 'We just covered the shared responsibility model at intermediate, beginner, and advanced levels, and the clinic example. The quiz is three questions on that same concept: a short definition, one control-ownership item, and one scenario in the style of the advanced explanation.', 'tutor', 7, 62, '2026-10-18 14:04:15'),
+  (111, 102, 'user', 'What did we work on last session?', NULL, 9, NULL, '2026-10-19 09:00:00'),
+  (112, 102, 'assistant', 'Yesterday, October 18, you asked what the Cloud Practitioner exam expects on the shared responsibility model. I answered at an intermediate level, then again at beginner and advanced levels, and used the clinic intake-forms example. You asked for a quiz on that concept. You got the definition and the access-control question right. You missed the scenario: patching the hypervisor is AWS, while the bucket policy and the CloudTrail trail are yours. We can review that missed question before the next domain.', 'tutor', 9, 125, '2026-10-19 09:00:20');
+
+INSERT INTO message_citations (message_id, chunk_id) VALUES
+  (102, 101),
+  (104, 101),
+  (106, 101),
+  (108, 102),
+  (110, 101),
+  (112, 101),
+  (112, 102);
+
+INSERT INTO questions (id, certification_id, exam_domain_id, type, stem, options, correct_answer, explanation, difficulty, generated_by, review_status, created_at) VALUES
+  (101, 101, 102, 'multiple_choice', 'In the shared responsibility model, who protects the physical data centers that run AWS services?', '[
+			{"key": "A", "text": "The customer, by writing a bucket policy"},
+			{"key": "B", "text": "AWS, because physical facilities are security of the cloud"},
+			{"key": "C", "text": "The customer, by turning on CloudTrail"},
+			{"key": "D", "text": "Both sides equally, for every control"}
+		]'::jsonb, '{"key": "B"}'::jsonb, 'Physical data centers are security of the cloud, so AWS owns that control. Bucket policies and CloudTrail are customer controls and do not answer this question.', 'beginner', 'ai_tutor', 'approved', '2026-10-18 14:04:15'),
+  (102, 101, 102, 'multiple_choice', 'A team stores intake forms in Amazon S3 and must decide which staff can read them. Who owns that decision?', '[
+			{"key": "A", "text": "AWS, because S3 is a managed service"},
+			{"key": "B", "text": "AWS, because it owns the hypervisor"},
+			{"key": "C", "text": "The customer, because access to data in the cloud is the customer''s responsibility"},
+			{"key": "D", "text": "The customer''s internet provider"}
+		]'::jsonb, '{"key": "C"}'::jsonb, 'Choosing who can read customer data is identity and access in the cloud. AWS runs S3, but the customer decides access to the objects.', 'intermediate', 'ai_tutor', 'approved', '2026-10-18 14:04:15'),
+  (103, 101, 102, 'multiple_choice', 'A clinic enables a CloudTrail trail, writes an S3 bucket policy, and uses a managed database. Who patches the hypervisor under that database?', '[
+			{"key": "A", "text": "The clinic, because it configured CloudTrail"},
+			{"key": "B", "text": "AWS, because the hypervisor is security of the cloud"},
+			{"key": "C", "text": "The clinic, because it wrote the bucket policy"},
+			{"key": "D", "text": "Both, because the database holds customer data"}
+		]'::jsonb, '{"key": "B"}'::jsonb, 'Assign each control separately. CloudTrail and the bucket policy belong to the clinic. Patching the hypervisor under the managed database belongs to AWS.', 'advanced', 'ai_tutor', 'approved', '2026-10-18 14:04:15');
+
+INSERT INTO question_sources (question_id, chunk_id) VALUES
+  (101, 101),
+  (102, 101),
+  (102, 102),
+  (103, 101),
+  (103, 102);
+
+INSERT INTO assessments (id, user_id, certification_id, type, started_at, completed_at, score) VALUES
+  (101, 101, 101, 'concept_quiz', '2026-10-18 14:05:00', '2026-10-18 14:12:00', 66.67);
+
+INSERT INTO attempts (id, assessment_id, user_id, question_id, selected_answer, is_correct, time_spent_seconds, answered_at) VALUES
+  (101, 101, 101, 101, '{"key": "B"}'::jsonb, TRUE, 35, '2026-10-18 14:06:00'),
+  (102, 101, 101, 102, '{"key": "C"}'::jsonb, TRUE, 48, '2026-10-18 14:08:00'),
+  (103, 101, 101, 103, '{"key": "A"}'::jsonb, FALSE, 70, '2026-10-18 14:12:00');
+
+INSERT INTO progress (user_id, exam_domain_id, mastery_score, questions_answered, last_activity_at) VALUES
+  (101, 102, 66.67, 3, '2026-10-18 14:12:00');
+
+SELECT setval(pg_get_serial_sequence('users', 'id'), (SELECT MAX(id) FROM users));
+
+SELECT setval(pg_get_serial_sequence('certifications', 'id'), (SELECT MAX(id) FROM certifications));
+
+SELECT setval(pg_get_serial_sequence('exam_domains', 'id'), (SELECT MAX(id) FROM exam_domains));
+
+SELECT setval(pg_get_serial_sequence('documents', 'id'), (SELECT MAX(id) FROM documents));
+
+SELECT setval(pg_get_serial_sequence('document_chunks', 'id'), (SELECT MAX(id) FROM document_chunks));
+
+SELECT setval(pg_get_serial_sequence('conversations', 'id'), (SELECT MAX(id) FROM conversations));
+
+SELECT setval(pg_get_serial_sequence('messages', 'id'), (SELECT MAX(id) FROM messages));
+
+SELECT setval(pg_get_serial_sequence('questions', 'id'), (SELECT MAX(id) FROM questions));
+
+SELECT setval(pg_get_serial_sequence('assessments', 'id'), (SELECT MAX(id) FROM assessments));
+
+SELECT setval(pg_get_serial_sequence('attempts', 'id'), (SELECT MAX(id) FROM attempts));
+
+COMMIT;
+-- Maya's two enrollments, adapted from 002_enrollments.sql for the merged database.
+-- Run after 003_ai_tutor_offset.sql.
+--
+-- Differences from 002_enrollments.sql:
+--   * ids shifted by +100 (Maya = user 101, Cloud Practitioner = certification 101)
+--   * the second enrollment points at certification 1, the SAA-C03 row already in seed_1.sql,
+--     so the database does not end up with two different "Solutions Architect - Associate" rows.
+--     The extra certification insert from 002_enrollments.sql is therefore dropped.
+
+BEGIN;
+
+INSERT INTO enrollments (
+	id, user_id, certification_id, goal, deadline, weekly_study_hours, status, created_at
+) VALUES
+	(101, 101, 101, 'Pass Cloud Practitioner on 15 December 2026. Ask certification questions, get explanations at my level, see real-world examples, take a quiz after each concept, and have the tutor remember earlier sessions.', '2026-12-15', 6.00, 'active', '2026-10-01 09:00:00'),
+	(102, 101, 1, 'After Cloud Practitioner, prepare for Solutions Architect - Associate (SAA-C03) and be able to explain a design choice in a scenario question.', '2027-03-20', 4.00, 'active', '2026-10-12 15:00:00');
+
+SELECT setval(pg_get_serial_sequence('enrollments', 'id'), (SELECT MAX(id) FROM enrollments));
+
+COMMIT;
+-- Knowledge expansion and question bank.
+-- Run after 003_ai_tutor_offset.sql and 004_enrollments_offset.sql.
+--
+-- 1. Cloud Practitioner (certification 101): the full CLF-C02 domain tree, 4 admin-owned study documents and
+--    20 chunks, taken from the AI Team's "AI Tutor Sample Dataset" PDF (explanations at three levels,
+--    real-world examples, source URLs). The PDF says its links were not live-checked, so every chunk carries
+--    "review": "unverified" until someone confirms it.
+--    The 001_ai_tutor.sql seed put "Shared Responsibility Model" under Cloud Concepts; the PDF and the official
+--    CLF-C02 outline place it under Security and Compliance, so it is moved there.
+-- 2. A consistent chunk metadata convention (concept, content_type, level, source_url, review) for the Chroma
+--    ingestion script to copy as filters. seed_1.sql chunks get concept + content_type.
+-- 3. A question bank: 28 questions grounded in the seed_1.sql chunks (certifications 1-5) and 10 from the PDF
+--    quizzes (certification 101), each linked to its source chunks in question_sources.
+--
+-- Conventions the tutor/grader can rely on:
+--   questions.type            multiple_choice | multiple_response | true_false
+--   questions.options         [{"key":"A","text":"..."}, ...]   (true_false uses keys T and F)
+--   questions.correct_answer  {"key":"B"}  or, for multiple_response, {"keys":["A","C"]} (sorted)
+--   attempts.selected_answer  same shape as correct_answer, so is_correct = (selected_answer = correct_answer)
+--   questions.generated_by    ai_generated (offline batch) | ai_tutor (created in a chat session) | human
+--   questions.review_status   approved | pending_review | rejected. The tutor should only serve 'approved'.
+--                             A few rows are left pending_review / rejected on purpose so that filter can be tested.
+
+BEGIN;
+
+INSERT INTO exam_domains (id, certification_id, parent_id, name, weight_percent) VALUES
+  (103, 101, NULL, 'Security and Compliance', 30.00),
+  (104, 101, NULL, 'Cloud Technology and Services', 34.00),
+  (105, 101, NULL, 'Billing, Pricing, and Support', 12.00),
+  (106, 101, 103, 'AWS Identity and Access Management (IAM)', NULL),
+  (107, 101, 103, 'Security Groups vs Network ACLs', NULL),
+  (108, 101, 104, 'Amazon S3 Storage Classes', NULL),
+  (109, 101, 104, 'AWS Global Infrastructure: Regions and Availability Zones', NULL),
+  (110, 101, 104, 'AWS Lambda and Serverless Computing', NULL),
+  (111, 101, 105, 'Amazon EC2 Pricing Models', NULL),
+  (112, 101, 105, 'AWS Cost Management Tools', NULL),
+  (113, 101, 101, 'AWS Well-Architected Framework', NULL);
+
+UPDATE exam_domains SET parent_id = 103 WHERE id = 102;
+
+INSERT INTO documents (id, certification_id, title, blob_path, status, uploaded_by, created_at) VALUES
+  (102, 101, 'CLF-C02 study notes: IAM and network security', 'seed/aws-cloud-practitioner/iam-and-network-security.md', 'ready', 102, '2026-10-10 11:30:00'),
+  (103, 101, 'CLF-C02 study notes: core services and global infrastructure', 'seed/aws-cloud-practitioner/core-services-and-infrastructure.md', 'ready', 102, '2026-10-10 11:30:00'),
+  (104, 101, 'CLF-C02 study notes: billing, pricing, and support', 'seed/aws-cloud-practitioner/billing-pricing-support.md', 'ready', 102, '2026-10-10 11:30:00'),
+  (105, 101, 'CLF-C02 study notes: cloud concepts and Well-Architected', 'seed/aws-cloud-practitioner/cloud-concepts-well-architected.md', 'ready', 102, '2026-10-10 11:30:00');
+
+INSERT INTO document_chunks (id, document_id, chunk_index, content, metadata, exam_domain_id) VALUES
+  (103, 101, 2, 'AWS and the customer split security duties. AWS is responsible for security OF the cloud: physical data centers, hardware, networking, and the software that runs AWS services. The customer is responsible for security IN the cloud: data, access, service configuration, and, for services such as EC2, the guest OS and applications, including patching.', '{"concept": "shared-responsibility-model", "content_type": "explanation", "level": "beginner", "source_url": "https://aws.amazon.com/compliance/shared-responsibility-model/", "review": "unverified"}'::jsonb, 102),
+  (104, 101, 3, 'Responsibility shifts depending on the service. With EC2, the customer manages the guest OS, applications, and security group rules. With a managed database such as RDS, AWS takes over OS and database software patching for the underlying instance, while the customer still manages data, access control, network settings, and parameter configuration. With Lambda, AWS manages servers and runtime infrastructure, and the customer manages code and permissions. Some controls, such as patch management, apply to both sides in different ways. Amazon Inspector can find vulnerabilities, but it does not patch the guest OS for you.', '{"concept": "shared-responsibility-model", "content_type": "explanation", "level": "intermediate", "source_url": "https://aws.amazon.com/compliance/shared-responsibility-model/", "review": "unverified"}'::jsonb, 102),
+  (105, 101, 4, 'Treat responsibility as a spectrum of control. For infrastructure services such as EC2, the customer manages the guest OS, patching, and network configuration. For managed services such as RDS, AWS takes on OS and database software patching while the customer focuses on data, access, and configuration. For more abstracted services such as Lambda and S3, AWS operates most of the platform and customer effort shifts toward data classification, encryption choices, IAM policies, and logging. Physical and environmental controls are inherited from AWS, while some controls remain shared.', '{"concept": "shared-responsibility-model", "content_type": "explanation", "level": "advanced", "source_url": "https://aws.amazon.com/compliance/shared-responsibility-model/", "review": "unverified"}'::jsonb, 102),
+  (106, 101, 5, 'A retailer runs its own MySQL database on EC2, so a night-shift engineer must patch the OS and database engine. After moving to Amazon RDS, that patching work shifts largely to AWS, but the retailer still decides who can read customer records and whether the data is encrypted.', '{"concept": "shared-responsibility-model", "content_type": "example", "level": "intermediate", "source_url": "https://aws.amazon.com/compliance/shared-responsibility-model/", "review": "unverified"}'::jsonb, 102),
+  (107, 102, 0, 'An IAM user is an identity for one person or application, with long-term credentials. An IAM group is a collection of users, so permissions can be attached once and applied to everyone in it. An IAM role is an identity with permissions that can be assumed temporarily by a user, application, or AWS service without long-term credentials. Permissions come from IAM policies. The best practice is least privilege: grant only what is needed. The root user has unrestricted access to the account, so protect it with multi-factor authentication (MFA) and use it only for the few tasks that require root.', '{"concept": "iam-users-groups-roles", "content_type": "explanation", "level": "beginner", "source_url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html", "review": "unverified"}'::jsonb, 106),
+  (108, 102, 1, 'In a hotel, each staff member has a named badge (user). Staff are organized by department, and each department receives a set of door permissions (group). A temporary contractor badge that an authorized person uses for the day and then hands back resembles a role.', '{"concept": "iam-users-groups-roles", "content_type": "example", "level": "beginner", "source_url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html", "review": "unverified"}'::jsonb, 106),
+  (109, 102, 2, 'Security groups act at the instance (network interface) level, support allow rules only, and are stateful: if inbound traffic is allowed, response traffic is automatically allowed. Network ACLs act at the subnet level, support allow and deny rules, are stateless (return traffic must be explicitly allowed), and evaluate rules in numbered order. They are commonly layered for defense in depth.', '{"concept": "security-groups-vs-nacls", "content_type": "explanation", "level": "advanced", "source_url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html", "review": "unverified"}'::jsonb, 107),
+  (110, 102, 3, 'A company''s web tier uses a security group that allows inbound HTTPS from the internet; replies flow back automatically. Security finds a malicious IP range attacking the subnet, so they add a network ACL deny rule for that range, something a security group cannot do because it has no deny rules.', '{"concept": "security-groups-vs-nacls", "content_type": "example", "level": "advanced", "source_url": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html", "review": "unverified"}'::jsonb, 107),
+  (111, 103, 0, 'Amazon S3 offers storage classes matched to access patterns. S3 Standard is for frequently accessed data. S3 Intelligent-Tiering automatically moves objects between access tiers when access patterns are unknown or change. S3 Standard-IA and S3 One Zone-IA are for infrequently accessed data that still needs millisecond access; One Zone-IA stores data in a single Availability Zone. The S3 Glacier classes are for archival data, with Deep Archive designed for lowest-cost long-term retention and retrieval measured in hours.', '{"concept": "s3-storage-classes", "content_type": "explanation", "level": "intermediate", "source_url": "https://aws.amazon.com/s3/storage-classes/", "review": "unverified"}'::jsonb, 108),
+  (112, 103, 1, 'A hospital keeps this month''s patient scans on S3 Standard for quick viewing, but archives imaging records it must retain for years for legal reasons in S3 Glacier Deep Archive, where storage costs less and a retrieval delay is acceptable.', '{"concept": "s3-storage-classes", "content_type": "example", "level": "intermediate", "source_url": "https://aws.amazon.com/s3/storage-classes/", "review": "unverified"}'::jsonb, 108),
+  (113, 103, 2, 'An AWS Region is a separate geographic area. Each Region has multiple Availability Zones. An AZ consists of one or more discrete data centers with redundant power, networking, and connectivity. AZs within a Region are connected by low-latency links. Running across multiple AZs helps keep an application available if one location has a problem.', '{"concept": "regions-and-availability-zones", "content_type": "explanation", "level": "beginner", "source_url": "https://aws.amazon.com/about-aws/global-infrastructure/regions_az/", "review": "unverified"}'::jsonb, 109),
+  (114, 103, 3, 'Imagine a pizza chain in one city. The city is the Region. Each separate kitchen, with its own power and equipment, is an Availability Zone. If one kitchen loses power, the other kitchens keep serving orders.', '{"concept": "regions-and-availability-zones", "content_type": "example", "level": "beginner", "source_url": "https://aws.amazon.com/about-aws/global-infrastructure/regions_az/", "review": "unverified"}'::jsonb, 109),
+  (115, 103, 4, 'Serverless means running code without provisioning or managing servers; AWS handles the infrastructure. Lambda runs code in response to events, such as a file upload or API call, and charges for requests and compute time. EC2 is different: you launch virtual servers and manage the operating system and software yourself.', '{"concept": "lambda-and-serverless", "content_type": "explanation", "level": "beginner", "source_url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html", "review": "unverified"}'::jsonb, 110),
+  (116, 103, 5, 'Owning a car resembles EC2: you pay for it, fuel it, and maintain it whether or not you drive. A ride-share resembles Lambda: you pay per trip and someone else handles the vehicle. A photo app might use Lambda to create a thumbnail each time a user uploads an image.', '{"concept": "lambda-and-serverless", "content_type": "example", "level": "beginner", "source_url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html", "review": "unverified"}'::jsonb, 110),
+  (117, 104, 0, 'On-Demand has no long-term commitment and charges by usage, which suits unpredictable or short-term workloads. Reserved Instances and Savings Plans offer discounts in exchange for a 1- or 3-year usage commitment, which suits steady workloads. Spot Instances use spare EC2 capacity at deep discounts but can be interrupted when AWS needs the capacity back, so they suit fault-tolerant and flexible workloads. Dedicated Hosts provide physical servers for licensing or compliance needs.', '{"concept": "ec2-pricing-models", "content_type": "explanation", "level": "intermediate", "source_url": "https://aws.amazon.com/ec2/pricing/", "review": "unverified"}'::jsonb, 111),
+  (118, 104, 1, 'A media company runs always-on web servers on a Savings Plan, adds On-Demand capacity during unexpected traffic spikes, and runs nightly video-encoding jobs on Spot Instances because a job can restart if an instance is interrupted.', '{"concept": "ec2-pricing-models", "content_type": "example", "level": "intermediate", "source_url": "https://aws.amazon.com/ec2/pricing/", "review": "unverified"}'::jsonb, 111),
+  (119, 104, 2, 'Cost Explorer visualizes and analyzes past costs and usage, with forecasting. AWS Budgets lets you set custom cost or usage budgets and sends alerts when actual or forecasted values exceed thresholds. AWS Pricing Calculator estimates the cost of AWS services before deployment.', '{"concept": "cost-management-tools", "content_type": "explanation", "level": "intermediate", "source_url": "https://docs.aws.amazon.com/cost-management/latest/userguide/ce-what-is.html", "review": "unverified"}'::jsonb, 112),
+  (120, 104, 3, 'Before migrating a data warehouse, a team uses Pricing Calculator to estimate monthly costs. After launch, they use Cost Explorer to see which service drives spend and set an AWS Budgets alert to email finance if forecasted spend passes the agreed limit.', '{"concept": "cost-management-tools", "content_type": "example", "level": "intermediate", "source_url": "https://docs.aws.amazon.com/cost-management/latest/userguide/ce-what-is.html", "review": "unverified"}'::jsonb, 112),
+  (121, 105, 0, 'The AWS Well-Architected Framework has six pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability. It provides best practices and questions for evaluating whether a workload is designed and operated well.', '{"concept": "well-architected-framework", "content_type": "explanation", "level": "beginner", "source_url": "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html", "review": "unverified"}'::jsonb, 113),
+  (122, 105, 1, 'Before a product launch, a team reviews its app against each pillar: can the team deploy safely, is customer data protected, does the system survive failures, does it perform well, is it cost-effective, and is resource use considered sustainably?', '{"concept": "well-architected-framework", "content_type": "example", "level": "beginner", "source_url": "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html", "review": "unverified"}'::jsonb, 113);
+
+-- Same metadata keys for the two chunks that came with 001_ai_tutor.sql.
+UPDATE document_chunks SET metadata = metadata || '{"content_type":"definition","source_url":"https://aws.amazon.com/compliance/shared-responsibility-model/","review":"unverified"}'::jsonb WHERE id = 101;
+UPDATE document_chunks SET metadata = metadata || '{"content_type":"example","source_url":"https://aws.amazon.com/compliance/shared-responsibility-model/","review":"unverified"}'::jsonb WHERE id = 102;
+
+-- concept + content_type for the 30 chunks in seed_1.sql (existing keys such as page/section are kept).
+UPDATE document_chunks AS c
+SET metadata = COALESCE(c.metadata, '{}'::jsonb) || jsonb_build_object('concept', v.concept, 'content_type', v.content_type)
+FROM (VALUES
+
+  (1, 'exam-overview', 'overview'),
+  (2, 'iam-least-privilege', 'explanation'),
+  (3, 's3-storage-classes', 'explanation'),
+  (4, 's3-lifecycle-glacier', 'explanation'),
+  (5, 'ebs-efs-s3', 'comparison'),
+  (6, 'nat-gateway', 'explanation'),
+  (7, 'vpc-endpoints', 'explanation'),
+  (8, 'security-groups-vs-nacls', 'comparison'),
+  (9, 'exam-overview', 'overview'),
+  (10, 'case-study-strategy', 'exam_strategy'),
+  (11, 'compute-engine', 'explanation'),
+  (12, 'gke', 'explanation'),
+  (13, 'cloud-run', 'explanation'),
+  (14, 'vpc-service-controls', 'explanation'),
+  (15, 'iam-best-practices', 'explanation'),
+  (16, 'exam-overview', 'overview'),
+  (17, 'azure-ai-authentication', 'explanation'),
+  (18, 'content-safety', 'explanation'),
+  (19, 'ai-search-index-vector', 'explanation'),
+  (20, 'hybrid-search-semantic-ranker', 'explanation'),
+  (21, 'rag-grounding', 'explanation'),
+  (22, 'azure-rbac', 'explanation'),
+  (23, 'entra-vs-azure-roles', 'comparison'),
+  (24, 'management-groups-policy', 'explanation'),
+  (25, 'storage-redundancy-lrs-zrs', 'explanation'),
+  (26, 'storage-redundancy-grs-gzrs', 'explanation'),
+  (27, 'terraform-core-workflow', 'explanation'),
+  (28, 'terraform-state-purpose', 'explanation'),
+  (29, 'remote-backends-locking', 'explanation'),
+  (30, 'terraform-state-commands', 'reference')
+
+) AS v(id, concept, content_type)
+WHERE c.id = v.id;
+
+INSERT INTO questions (id, certification_id, exam_domain_id, type, stem, options, correct_answer, explanation, difficulty, generated_by, review_status, created_at) VALUES
+  (1, 1, 2, 'multiple_choice', 'An application running on Amazon EC2 needs to call other AWS services. What is the recommended way to give it credentials?', '[{"key": "A", "text": "Embed long-term access keys in the application configuration"}, {"key": "B", "text": "Attach an IAM role to the instance"}, {"key": "C", "text": "Share the root user''s access keys with the application"}, {"key": "D", "text": "Create an IAM user and store its password on the instance"}]'::jsonb, '{"key": "B"}'::jsonb, 'Prefer IAM roles over long-term access keys for workloads running on EC2, Lambda and ECS. A role gives the workload temporary credentials, so no secret is stored in code or configuration.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (2, 1, 2, 'multiple_choice', 'Which feature sets permission guardrails across multiple AWS accounts?', '[{"key": "A", "text": "Security groups"}, {"key": "B", "text": "VPC endpoints"}, {"key": "C", "text": "S3 Lifecycle rules"}, {"key": "D", "text": "AWS Organizations service control policies (SCPs)"}]'::jsonb, '{"key": "D"}'::jsonb, 'AWS Organizations service control policies (SCPs) set permission guardrails across accounts. Security groups, VPC endpoints and lifecycle rules do not control account-level permissions.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (3, 1, 10, 'multiple_choice', 'Which S3 storage class is cheaper for infrequent access but charges a per-GB retrieval fee and has a 30-day minimum storage duration?', '[{"key": "A", "text": "S3 Standard"}, {"key": "B", "text": "S3 Intelligent-Tiering"}, {"key": "C", "text": "S3 Standard-IA"}, {"key": "D", "text": "S3 Glacier Deep Archive"}]'::jsonb, '{"key": "C"}'::jsonb, 'S3 Standard-IA (and One Zone-IA) are cheaper for infrequent access but charge a per-GB retrieval fee and have a 30-day minimum storage duration. Intelligent-Tiering charges a small monitoring fee per object instead, and Standard has neither limit.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (4, 1, 10, 'multiple_choice', 'Application logs are read often for the first month, almost never after that, and must be kept for 7 years. A restore time of up to 48 hours is acceptable. Which approach is the most cost-effective?', '[{"key": "A", "text": "Keep all logs in S3 Standard and never transition them"}, {"key": "B", "text": "Move logs to S3 One Zone-IA on day 1 and keep them forever"}, {"key": "C", "text": "Use a lifecycle rule: Standard to Standard-IA after 30 days, to S3 Glacier Deep Archive after 180 days, and expire at 7 years"}, {"key": "D", "text": "Store the logs on an EBS volume attached to an EC2 instance"}]'::jsonb, '{"key": "C"}'::jsonb, 'Lifecycle rules transition objects to cheaper classes after a set number of days and can expire them. Deep Archive restores within 12 to 48 hours, which fits a compliance archive that is rarely read.', 'advanced', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (5, 1, 8, 'multiple_choice', 'Which AWS storage service is a managed NFS file system that many instances across Availability Zones can mount at the same time?', '[{"key": "A", "text": "Amazon EBS"}, {"key": "B", "text": "Amazon S3"}, {"key": "C", "text": "Amazon EFS"}, {"key": "D", "text": "EC2 instance store"}]'::jsonb, '{"key": "C"}'::jsonb, 'Amazon EFS is a managed NFS file system that many instances across AZs can mount at once. EBS is block storage attached to one instance in one AZ, and S3 is object storage accessed over HTTPS, not a mountable file system.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (6, 1, 7, 'multiple_choice', 'Instances in private subnets must start outbound connections to the internet, inbound connections must be blocked, and the design must survive the failure of one Availability Zone. What should you deploy?', '[{"key": "A", "text": "A single NAT gateway in one public subnet"}, {"key": "B", "text": "One NAT gateway in a public subnet in each Availability Zone"}, {"key": "C", "text": "An internet gateway attached to each private subnet"}, {"key": "D", "text": "A security group that allows all inbound traffic"}]'::jsonb, '{"key": "B"}'::jsonb, 'A NAT gateway lets private instances start outbound connections while blocking inbound ones. It lives in one AZ, so deploy one per AZ for high availability.', 'intermediate', 'ai_generated', 'pending_review', '2026-10-10 12:00:00'),
+  (7, 1, 7, 'multiple_response', 'Which TWO statements about gateway VPC endpoints are true?', '[{"key": "A", "text": "They support only Amazon S3 and DynamoDB"}, {"key": "B", "text": "They create ENIs with private IP addresses in your subnets"}, {"key": "C", "text": "They are added as targets in route tables"}, {"key": "D", "text": "They are billed per hour and per GB processed"}]'::jsonb, '{"keys": ["A", "C"]}'::jsonb, 'Gateway endpoints support only S3 and DynamoDB, are added as route table targets and have no extra charge. Interface endpoints (AWS PrivateLink) are the ones that create ENIs and are billed per hour and per GB.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (8, 1, 2, 'true_false', 'True or false: network ACLs are stateful, so return traffic is automatically allowed.', '[{"key": "T", "text": "True"}, {"key": "F", "text": "False"}]'::jsonb, '{"key": "F"}'::jsonb, 'False. Network ACLs are stateless and apply at the subnet level, so return traffic must be allowed explicitly. Security groups are the stateful ones.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (9, 2, 12, 'multiple_choice', 'A stateless REST API has very spiky traffic. The team does not want to manage clusters and wants to pay per request time. Which compute option fits best?', '[{"key": "A", "text": "Compute Engine managed instance group"}, {"key": "B", "text": "GKE Standard mode"}, {"key": "C", "text": "Cloud Run"}, {"key": "D", "text": "A single large virtual machine"}]'::jsonb, '{"key": "C"}'::jsonb, 'Cloud Run runs stateless containers, scales to zero and bills per request time. It suits APIs with spiky traffic and teams that do not want to manage clusters.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (10, 2, 12, 'multiple_choice', 'A legacy application needs a specific licensed OS image and kernel-level access. Which compute option fits best?', '[{"key": "A", "text": "Cloud Run"}, {"key": "B", "text": "Compute Engine"}, {"key": "C", "text": "GKE Autopilot"}, {"key": "D", "text": "Cloud Functions"}]'::jsonb, '{"key": "B"}'::jsonb, 'Compute Engine gives full control of VMs. Licensed software tied to the OS and kernel-level access are the classic signals for VMs; managed instance groups add autoscaling and autohealing.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (11, 2, 15, 'multiple_choice', 'Data in BigQuery must not be copied outside the company''s perimeter, even by users who hold valid IAM credentials. Which control addresses this?', '[{"key": "A", "text": "Grant users the basic Viewer role"}, {"key": "B", "text": "Organization policy restricting resource locations"}, {"key": "C", "text": "Service account keys with short expiry"}, {"key": "D", "text": "A VPC Service Controls perimeter around BigQuery"}]'::jsonb, '{"key": "D"}'::jsonb, 'VPC Service Controls create a service perimeter around Google-managed services such as BigQuery and Cloud Storage. Requests from outside the perimeter are blocked even with valid IAM credentials.', 'advanced', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (12, 2, 15, 'multiple_response', 'Which TWO practices match the IAM guidance for Google Cloud?', '[{"key": "A", "text": "Grant predefined roles to groups at the lowest practical level of the resource hierarchy"}, {"key": "B", "text": "Grant developers the basic Owner role"}, {"key": "C", "text": "Download a service account key for every workload"}, {"key": "D", "text": "Use Workload Identity Federation instead of downloaded service account keys where possible"}]'::jsonb, '{"keys": ["A", "D"]}'::jsonb, 'Prefer predefined roles granted to groups at the lowest practical level over basic roles like Owner or Editor, and avoid downloaded keys where Workload Identity Federation is possible.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (13, 2, 16, 'multiple_choice', 'In a Professional Cloud Architect case study question, which answer is usually the best choice?', '[{"key": "A", "text": "The most powerful service available"}, {"key": "B", "text": "The most customizable self-managed option"}, {"key": "C", "text": "The cheapest option regardless of requirements"}, {"key": "D", "text": "The most managed option that meets the stated requirements"}]'::jsonb, '{"key": "D"}'::jsonb, 'Map each business and technical requirement to a service choice. The best answer usually meets the stated requirements with the most managed option, not the most powerful one.', 'intermediate', 'ai_generated', 'pending_review', '2026-10-10 12:00:00'),
+  (14, 3, 20, 'multiple_choice', 'An application calls Azure AI Language. How can it authenticate without storing a secret in code?', '[{"key": "A", "text": "Hard-code the subscription key in the source"}, {"key": "B", "text": "Store the key in appsettings.json"}, {"key": "C", "text": "Use a managed identity with the Cognitive Services User role"}, {"key": "D", "text": "Email the key to each developer"}]'::jsonb, '{"key": "C"}'::jsonb, 'A managed identity with a role assignment such as Cognitive Services User authenticates with a Microsoft Entra ID token, so no secret is stored in code. If keys are used, keep them in Azure Key Vault.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (15, 3, 20, 'multiple_choice', 'What is the zero-downtime sequence for rotating Azure AI services keys with the two-key pattern?', '[{"key": "A", "text": "Regenerate both keys at once, then update the app"}, {"key": "B", "text": "Regenerate key 2, switch the app to key 2, then regenerate key 1"}, {"key": "C", "text": "Delete the resource and create a new one"}, {"key": "D", "text": "Regenerate key 1 and leave the app on key 1 until it fails"}]'::jsonb, '{"key": "B"}'::jsonb, 'Regenerate key 2, switch the app to key 2, then regenerate key 1. The app always has one valid key during the change.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (16, 3, 21, 'multiple_choice', 'Which Azure AI Content Safety feature detects jailbreak attempts and indirect prompt injection attacks?', '[{"key": "A", "text": "Prompt Shields"}, {"key": "B", "text": "Severity levels"}, {"key": "C", "text": "Azure Key Vault"}, {"key": "D", "text": "Semantic ranker"}]'::jsonb, '{"key": "A"}'::jsonb, 'Prompt Shields detect jailbreak and indirect prompt injection attacks. Content Safety''s harm categories (hate, sexual, violence, self-harm) each have severity levels, which is a different feature.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (17, 3, 28, 'multiple_choice', 'In an Azure AI Search index that uses text-embedding-3-small, how many dimensions should the vector field have?', '[{"key": "A", "text": "1536"}, {"key": "B", "text": "768"}, {"key": "C", "text": "3072"}, {"key": "D", "text": "512"}]'::jsonb, '{"key": "A"}'::jsonb, 'The vector field dimensions must match the embedding model, for example 1536 for text-embedding-3-small, with an HNSW vector profile.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (18, 3, 28, 'multiple_choice', 'How does hybrid search in Azure AI Search merge the keyword and vector results?', '[{"key": "A", "text": "K-means clustering"}, {"key": "B", "text": "Alphabetical sorting"}, {"key": "C", "text": "HNSW graph traversal"}, {"key": "D", "text": "Reciprocal Rank Fusion"}]'::jsonb, '{"key": "D"}'::jsonb, 'Hybrid search runs a BM25 keyword query and a vector query in parallel and merges the results with Reciprocal Rank Fusion. The semantic ranker then re-scores the top results.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (19, 4, 30, 'multiple_choice', 'A user holds the Global Administrator role in Microsoft Entra ID and wants to delete a virtual machine. What is needed by default?', '[{"key": "A", "text": "Nothing; Global Administrator manages Azure resources by default"}, {"key": "B", "text": "The User Administrator role in Entra ID"}, {"key": "C", "text": "An Azure RBAC role such as Contributor at a suitable scope"}, {"key": "D", "text": "A deny assignment"}]'::jsonb, '{"key": "C"}'::jsonb, 'Entra roles control directory objects and Azure roles control Azure resources; they are separate systems. A Global Administrator does not manage resources by default but can elevate access.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (20, 4, 30, 'multiple_choice', 'A user is assigned the Reader role at the subscription scope. Which resources can the user read?', '[{"key": "A", "text": "Only the subscription object itself"}, {"key": "B", "text": "Only resources in the first resource group"}, {"key": "C", "text": "No resources until a deny assignment is removed"}, {"key": "D", "text": "All resource groups and resources in that subscription"}]'::jsonb, '{"key": "D"}'::jsonb, 'Role assignments are inherited by child scopes, so Reader at the subscription applies to every resource group and resource in it.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (21, 4, 33, 'multiple_choice', 'Which storage redundancy option keeps three copies across three availability zones in the primary region?', '[{"key": "A", "text": "ZRS"}, {"key": "B", "text": "LRS"}, {"key": "C", "text": "GRS"}, {"key": "D", "text": "RA-GRS"}]'::jsonb, '{"key": "A"}'::jsonb, 'Zone-redundant storage (ZRS) keeps three copies across three availability zones, so data stays available if one zone fails. LRS keeps three copies in one datacenter.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (22, 4, 33, 'true_false', 'True or false: with plain GRS, the data in the secondary region can be read at any time.', '[{"key": "T", "text": "True"}, {"key": "F", "text": "False"}]'::jsonb, '{"key": "F"}'::jsonb, 'False. The secondary is readable only with RA-GRS or RA-GZRS. Without read access, data in the secondary is available only after a failover.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (23, 4, 31, 'multiple_choice', 'An Azure Policy is assigned at a management group. Which resources does it apply to?', '[{"key": "A", "text": "Only the management group object"}, {"key": "B", "text": "All child subscriptions"}, {"key": "C", "text": "Only resource groups created later"}, {"key": "D", "text": "Nothing until each subscription opts in"}]'::jsonb, '{"key": "B"}'::jsonb, 'Azure Policy assignments at a management group apply to all child subscriptions and can deny, audit or modify non-compliant resources.', 'intermediate', 'ai_generated', 'pending_review', '2026-10-10 12:00:00'),
+  (24, 5, 40, 'multiple_choice', 'Which Terraform command downloads providers and modules and configures the backend?', '[{"key": "A", "text": "terraform plan"}, {"key": "B", "text": "terraform apply"}, {"key": "C", "text": "terraform init"}, {"key": "D", "text": "terraform fmt"}]'::jsonb, '{"key": "C"}'::jsonb, 'terraform init downloads providers and modules and configures the backend. plan shows proposed changes, apply makes them, and fmt checks style.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (25, 5, 41, 'multiple_choice', 'Terraform state can contain secrets in plain text. How should state be handled?', '[{"key": "A", "text": "Commit it to version control"}, {"key": "B", "text": "Email it to the team"}, {"key": "C", "text": "Store it securely and never commit it to version control"}, {"key": "D", "text": "Delete it after each apply"}]'::jsonb, '{"key": "C"}'::jsonb, 'State can contain secrets in plain text, so it must be stored securely and never committed to version control.', 'beginner', 'ai_generated', 'rejected', '2026-10-10 12:00:00'),
+  (26, 5, 42, 'multiple_choice', 'What does state locking prevent?', '[{"key": "A", "text": "Two runs writing the state at the same time"}, {"key": "B", "text": "Providers being downloaded twice"}, {"key": "C", "text": "The use of modules"}, {"key": "D", "text": "The use of terraform fmt"}]'::jsonb, '{"key": "A"}'::jsonb, 'State locking stops two runs from writing the state at the same time. terraform force-unlock removes a stuck lock.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (27, 5, 42, 'multiple_choice', 'Since Terraform 1.10, which S3 backend setting enables native state locking without a DynamoDB table?', '[{"key": "A", "text": "dynamodb_table = \"locks\""}, {"key": "B", "text": "use_lockfile = true"}, {"key": "C", "text": "force_lock = true"}, {"key": "D", "text": "native_lock = on"}]'::jsonb, '{"key": "B"}'::jsonb, 'With the S3 backend, locking used a DynamoDB table; since Terraform 1.10 it can use S3 native locking with use_lockfile = true.', 'advanced', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (28, 5, 41, 'multiple_choice', 'What is the recommended way to rename a resource address in code without destroying the resource?', '[{"key": "A", "text": "Delete the resource and create a new one"}, {"key": "B", "text": "Edit the state file by hand"}, {"key": "C", "text": "Run terraform destroy, then apply"}, {"key": "D", "text": "Add a moved block"}]'::jsonb, '{"key": "D"}'::jsonb, 'Prefer moved blocks over terraform state mv for refactors; they are reviewable in code and update the state without recreating the resource.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (104, 101, 102, 'multiple_choice', 'A company runs a web application on Amazon EC2 instances. Who is responsible for installing security patches on the guest operating system?', '[{"key": "A", "text": "AWS"}, {"key": "B", "text": "The customer"}, {"key": "C", "text": "A third-party auditor"}, {"key": "D", "text": "Amazon Inspector automatically"}]'::jsonb, '{"key": "B"}'::jsonb, 'With EC2, the customer manages the guest operating system, including updates and security patches, applications, and security group configuration. AWS manages the underlying host, hardware, and facilities. Amazon Inspector can find vulnerabilities, but it does not patch the OS for you.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (105, 101, 106, 'multiple_choice', 'Which is a recommended best practice for the AWS account root user?', '[{"key": "A", "text": "Use it for daily administrative tasks"}, {"key": "B", "text": "Share its credentials with the whole team"}, {"key": "C", "text": "Enable multi-factor authentication (MFA) and avoid using it for everyday tasks"}, {"key": "D", "text": "Create access keys for it and embed them in applications"}]'::jsonb, '{"key": "C"}'::jsonb, 'The root user has unrestricted access to the account. AWS recommends protecting it with MFA and using it only for the few tasks that require root, while using IAM identities with least-privilege permissions for daily work.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (106, 101, 102, 'multiple_choice', 'A company moves a self-managed database from Amazon EC2 to Amazon RDS. Which task does AWS take over as a result?', '[{"key": "A", "text": "Managing IAM permissions for database access"}, {"key": "B", "text": "Patching the operating system of the underlying database instance"}, {"key": "C", "text": "Classifying the sensitivity of stored data"}, {"key": "D", "text": "Configuring security group rules"}]'::jsonb, '{"key": "B"}'::jsonb, 'Amazon RDS is a managed service, so AWS handles OS and database software patching for the underlying infrastructure. Access permissions, data classification, and security group rules remain customer responsibilities.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (107, 101, 108, 'multiple_choice', 'A company must retain compliance records for more than 7 years. The records are rarely accessed, retrieval within 12 hours is acceptable, and the company wants the lowest storage cost. Which S3 storage class fits best?', '[{"key": "A", "text": "S3 Standard"}, {"key": "B", "text": "S3 Intelligent-Tiering"}, {"key": "C", "text": "S3 Glacier Deep Archive"}, {"key": "D", "text": "S3 One Zone-IA"}]'::jsonb, '{"key": "C"}'::jsonb, 'S3 Glacier Deep Archive is designed for long-term archives that are rarely retrieved, with low storage cost and retrieval in hours. One Zone-IA is for infrequently accessed data that needs millisecond access and stores data in one Availability Zone, making it a poor fit for critical compliance records.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (108, 101, 111, 'multiple_choice', 'A company runs a fault-tolerant, flexible batch-processing job that can be interrupted and restarted. Which EC2 purchasing option is most cost-effective?', '[{"key": "A", "text": "On-Demand Instances"}, {"key": "B", "text": "Dedicated Hosts"}, {"key": "C", "text": "Spot Instances"}, {"key": "D", "text": "Standard Reserved Instances"}]'::jsonb, '{"key": "C"}'::jsonb, 'Spot Instances offer large discounts and suit workloads that tolerate interruption. Reserved Instances suit steady-state use, On-Demand costs more for this type of job, and Dedicated Hosts address licensing or compliance requirements.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (109, 101, 107, 'multiple_choice', 'Which statement about security groups is correct?', '[{"key": "A", "text": "They are stateless, so return traffic must be explicitly allowed"}, {"key": "B", "text": "They support explicit deny rules"}, {"key": "C", "text": "They are stateful, so return traffic for an allowed request is automatically allowed"}, {"key": "D", "text": "They operate at the subnet level"}]'::jsonb, '{"key": "C"}'::jsonb, 'Security groups are stateful and apply at the instance (network interface) level. Network ACLs are the stateless, subnet-level control and support explicit deny rules.', 'advanced', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (110, 101, 112, 'multiple_choice', 'A team wants an email alert when forecasted monthly spend is expected to exceed $5,000. Which AWS service should they use?', '[{"key": "A", "text": "AWS Pricing Calculator"}, {"key": "B", "text": "AWS Budgets"}, {"key": "C", "text": "AWS Cost Explorer"}, {"key": "D", "text": "AWS Trusted Advisor"}]'::jsonb, '{"key": "B"}'::jsonb, 'AWS Budgets supports threshold alerts on actual and forecasted costs. Cost Explorer analyzes and visualizes costs, and Pricing Calculator estimates future costs before deployment.', 'intermediate', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (111, 101, 109, 'multiple_choice', 'A company wants its application to stay available even if one data center location fails. What should it do?', '[{"key": "A", "text": "Deploy the application in a single Availability Zone"}, {"key": "B", "text": "Deploy the application across multiple Availability Zones"}, {"key": "C", "text": "Purchase a larger EC2 instance"}, {"key": "D", "text": "Move the application to an on-premises server"}]'::jsonb, '{"key": "B"}'::jsonb, 'Distributing resources across multiple AZs in a Region improves availability because a failure in one AZ does not take down the entire application. A larger instance in one AZ does not remove that single point of failure.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (112, 101, 113, 'multiple_choice', 'Which of the following is NOT one of the six pillars of the AWS Well-Architected Framework?', '[{"key": "A", "text": "Reliability"}, {"key": "B", "text": "Scalability"}, {"key": "C", "text": "Cost Optimization"}, {"key": "D", "text": "Sustainability"}]'::jsonb, '{"key": "B"}'::jsonb, 'Scalability is an important design concept but not one of the six pillars. Sustainability is one of the pillars.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00'),
+  (113, 101, 110, 'multiple_choice', 'Which statement best describes AWS Lambda?', '[{"key": "A", "text": "Virtual servers that you must patch and manage"}, {"key": "B", "text": "A service that runs code in response to events without provisioning or managing servers"}, {"key": "C", "text": "A managed relational database service"}, {"key": "D", "text": "An object storage service"}]'::jsonb, '{"key": "B"}'::jsonb, 'Lambda is a serverless compute service that runs code in response to events while AWS manages the underlying compute infrastructure. Option A describes EC2, C describes Amazon RDS, and D describes Amazon S3.', 'beginner', 'ai_generated', 'approved', '2026-10-10 12:00:00');
+
+INSERT INTO question_sources (question_id, chunk_id) VALUES
+  (1, 2),
+  (2, 2),
+  (3, 3),
+  (4, 4),
+  (4, 3),
+  (5, 5),
+  (6, 6),
+  (7, 7),
+  (8, 8),
+  (9, 13),
+  (10, 11),
+  (11, 14),
+  (12, 15),
+  (13, 10),
+  (14, 17),
+  (15, 17),
+  (16, 18),
+  (17, 19),
+  (18, 20),
+  (19, 23),
+  (20, 22),
+  (21, 25),
+  (22, 26),
+  (23, 24),
+  (24, 27),
+  (25, 28),
+  (26, 29),
+  (27, 29),
+  (28, 30),
+  (104, 103),
+  (104, 104),
+  (105, 107),
+  (106, 104),
+  (106, 106),
+  (107, 111),
+  (108, 117),
+  (109, 109),
+  (110, 119),
+  (111, 113),
+  (112, 121),
+  (113, 115);
+
+SELECT setval(pg_get_serial_sequence('exam_domains', 'id'), (SELECT MAX(id) FROM exam_domains));
+SELECT setval(pg_get_serial_sequence('documents', 'id'), (SELECT MAX(id) FROM documents));
+SELECT setval(pg_get_serial_sequence('document_chunks', 'id'), (SELECT MAX(id) FROM document_chunks));
+SELECT setval(pg_get_serial_sequence('questions', 'id'), (SELECT MAX(id) FROM questions));
+
+COMMIT;
+-- Learning activity for the five seed_1.sql learners: assessments, attempts and progress.
+-- Run after 005_knowledge_and_question_bank.sql.
+--
+-- Only 'approved' questions are used, and every attempt is for a question of the assessment's certification.
+-- assessments.score = percent of correct attempts; progress.mastery_score = percent correct per topic
+-- (exam_domain) over all of that learner's attempts, so the three tables agree with each other.
+-- Patterns included for the tutor to find (as v_learner_topic_status in 007 reports them):
+--   improving: John (secure access, networking, S3 cost), Jane (Azure AI auth), Phil (RBAC, storage)
+--   open:      Nathan (IAM / VPC Service Controls), Jane (AI Search), Lily (VPC endpoints, Terraform state locking)
+-- plus a diagnostic (Lily), a mock exam (John), and one assessment still in progress
+-- (Jane, completed_at and score are NULL).
+-- Maya (user 101) already has her own activity from 003_ai_tutor_offset.sql.
+
+BEGIN;
+
+INSERT INTO assessments (id, user_id, certification_id, type, started_at, completed_at, score) VALUES
+  (1, 1, 1, 'concept_quiz', '2026-09-03 20:00:00', '2026-09-03 20:11:00', 66.67),
+  (2, 1, 1, 'concept_quiz', '2026-09-21 21:45:00', '2026-09-21 21:55:00', 50.0),
+  (3, 1, 1, 'mock_exam', '2026-10-17 19:00:00', '2026-10-17 19:20:00', 85.71),
+  (4, 2, 2, 'concept_quiz', '2026-09-11 18:30:00', '2026-09-11 18:36:00', 100.0),
+  (5, 2, 2, 'concept_quiz', '2026-10-06 19:45:00', '2026-10-06 19:53:00', 50.0),
+  (6, 3, 3, 'concept_quiz', '2026-09-16 21:30:00', '2026-09-16 21:38:00', 50.0),
+  (7, 3, 3, 'concept_quiz', '2026-10-09 21:00:00', '2026-10-09 21:09:00', 66.67),
+  (8, 3, 3, 'mock_exam', '2026-10-19 22:00:00', NULL, NULL),
+  (9, 4, 4, 'concept_quiz', '2026-09-26 07:00:00', '2026-09-26 07:06:00', 50.0),
+  (10, 4, 4, 'concept_quiz', '2026-10-13 07:30:00', '2026-10-13 07:37:00', 50.0),
+  (11, 4, 4, 'concept_quiz', '2026-10-15 07:20:00', '2026-10-15 07:25:00', 100.0),
+  (12, 5, 5, 'concept_quiz', '2026-09-19 20:50:00', '2026-09-19 21:00:00', 75.0),
+  (13, 5, 1, 'diagnostic', '2026-10-15 21:30:00', '2026-10-15 21:42:00', 50.0);
+
+INSERT INTO attempts (id, assessment_id, user_id, question_id, selected_answer, is_correct, time_spent_seconds, answered_at) VALUES
+  (1, 1, 1, 3, '{"key": "C"}'::jsonb, TRUE, 62, '2026-09-03 20:03:00'),
+  (2, 1, 1, 4, '{"key": "A"}'::jsonb, FALSE, 95, '2026-09-03 20:07:00'),
+  (3, 1, 1, 5, '{"key": "C"}'::jsonb, TRUE, 48, '2026-09-03 20:11:00'),
+  (4, 2, 1, 7, '{"keys": ["A", "B"]}'::jsonb, FALSE, 88, '2026-09-21 21:50:00'),
+  (5, 2, 1, 8, '{"key": "F"}'::jsonb, TRUE, 30, '2026-09-21 21:55:00'),
+  (6, 3, 1, 1, '{"key": "B"}'::jsonb, TRUE, 40, '2026-10-17 19:02:00'),
+  (7, 3, 1, 2, '{"key": "A"}'::jsonb, FALSE, 72, '2026-10-17 19:05:00'),
+  (8, 3, 1, 3, '{"key": "C"}'::jsonb, TRUE, 35, '2026-10-17 19:08:00'),
+  (9, 3, 1, 4, '{"key": "C"}'::jsonb, TRUE, 110, '2026-10-17 19:12:00'),
+  (10, 3, 1, 5, '{"key": "C"}'::jsonb, TRUE, 42, '2026-10-17 19:15:00'),
+  (11, 3, 1, 7, '{"keys": ["A", "C"]}'::jsonb, TRUE, 66, '2026-10-17 19:18:00'),
+  (12, 3, 1, 8, '{"key": "F"}'::jsonb, TRUE, 25, '2026-10-17 19:20:00'),
+  (13, 4, 2, 9, '{"key": "C"}'::jsonb, TRUE, 55, '2026-09-11 18:33:00'),
+  (14, 4, 2, 10, '{"key": "B"}'::jsonb, TRUE, 60, '2026-09-11 18:36:00'),
+  (15, 5, 2, 11, '{"key": "D"}'::jsonb, TRUE, 90, '2026-10-06 19:48:00'),
+  (16, 5, 2, 12, '{"keys": ["C", "D"]}'::jsonb, FALSE, 120, '2026-10-06 19:53:00'),
+  (17, 6, 3, 17, '{"key": "A"}'::jsonb, TRUE, 70, '2026-09-16 21:34:00'),
+  (18, 6, 3, 18, '{"key": "C"}'::jsonb, FALSE, 100, '2026-09-16 21:38:00'),
+  (19, 7, 3, 14, '{"key": "C"}'::jsonb, TRUE, 52, '2026-10-09 21:03:00'),
+  (20, 7, 3, 15, '{"key": "A"}'::jsonb, FALSE, 85, '2026-10-09 21:06:00'),
+  (21, 7, 3, 16, '{"key": "A"}'::jsonb, TRUE, 44, '2026-10-09 21:09:00'),
+  (22, 8, 3, 14, '{"key": "C"}'::jsonb, TRUE, 38, '2026-10-19 22:02:00'),
+  (23, 8, 3, 16, '{"key": "A"}'::jsonb, TRUE, 41, '2026-10-19 22:04:00'),
+  (24, 9, 4, 19, '{"key": "A"}'::jsonb, FALSE, 110, '2026-09-26 07:03:00'),
+  (25, 9, 4, 20, '{"key": "D"}'::jsonb, TRUE, 75, '2026-09-26 07:06:00'),
+  (26, 10, 4, 21, '{"key": "A"}'::jsonb, TRUE, 58, '2026-10-13 07:33:00'),
+  (27, 10, 4, 22, '{"key": "T"}'::jsonb, FALSE, 96, '2026-10-13 07:37:00'),
+  (28, 11, 4, 19, '{"key": "C"}'::jsonb, TRUE, 64, '2026-10-15 07:22:00'),
+  (29, 11, 4, 22, '{"key": "F"}'::jsonb, TRUE, 45, '2026-10-15 07:25:00'),
+  (30, 12, 5, 24, '{"key": "C"}'::jsonb, TRUE, 30, '2026-09-19 20:52:00'),
+  (31, 12, 5, 26, '{"key": "A"}'::jsonb, TRUE, 50, '2026-09-19 20:54:00'),
+  (32, 12, 5, 27, '{"key": "A"}'::jsonb, FALSE, 105, '2026-09-19 20:57:00'),
+  (33, 12, 5, 28, '{"key": "D"}'::jsonb, TRUE, 60, '2026-09-19 21:00:00'),
+  (34, 13, 5, 1, '{"key": "A"}'::jsonb, FALSE, 80, '2026-10-15 21:33:00'),
+  (35, 13, 5, 3, '{"key": "C"}'::jsonb, TRUE, 66, '2026-10-15 21:36:00'),
+  (36, 13, 5, 7, '{"keys": ["A", "D"]}'::jsonb, FALSE, 130, '2026-10-15 21:39:00'),
+  (37, 13, 5, 8, '{"key": "F"}'::jsonb, TRUE, 40, '2026-10-15 21:42:00');
+
+INSERT INTO progress (user_id, exam_domain_id, mastery_score, questions_answered, last_activity_at) VALUES
+  (1, 2, 75.0, 4, '2026-10-17 19:20:00'),
+  (1, 7, 50.0, 2, '2026-10-17 19:18:00'),
+  (1, 8, 100.0, 2, '2026-10-17 19:15:00'),
+  (1, 10, 75.0, 4, '2026-10-17 19:12:00'),
+  (2, 12, 100.0, 2, '2026-09-11 18:36:00'),
+  (2, 15, 50.0, 2, '2026-10-06 19:53:00'),
+  (3, 20, 66.67, 3, '2026-10-19 22:02:00'),
+  (3, 21, 100.0, 2, '2026-10-19 22:04:00'),
+  (3, 28, 50.0, 2, '2026-09-16 21:38:00'),
+  (4, 30, 66.67, 3, '2026-10-15 07:22:00'),
+  (4, 33, 66.67, 3, '2026-10-15 07:25:00'),
+  (5, 2, 50.0, 2, '2026-10-15 21:42:00'),
+  (5, 7, 0.0, 1, '2026-10-15 21:39:00'),
+  (5, 10, 100.0, 1, '2026-10-15 21:36:00'),
+  (5, 40, 100.0, 1, '2026-09-19 20:52:00'),
+  (5, 41, 100.0, 1, '2026-09-19 21:00:00'),
+  (5, 42, 50.0, 2, '2026-09-19 20:57:00');
+
+SELECT setval(pg_get_serial_sequence('assessments', 'id'), (SELECT MAX(id) FROM assessments));
+SELECT setval(pg_get_serial_sequence('attempts', 'id'), (SELECT MAX(id) FROM attempts));
+
+COMMIT;
