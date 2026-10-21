@@ -1,0 +1,192 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.users (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  external_auth_id character varying NOT NULL UNIQUE,
+  address character varying,
+  display_name character varying NOT NULL,
+  date_of_birth date,
+  email character varying NOT NULL,
+  created_at timestamp without time zone NOT NULL DEFAULT now(),
+  role character varying NOT NULL,
+  CONSTRAINT users_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.certifications (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  name character varying NOT NULL,
+  slug character varying NOT NULL UNIQUE,
+  description text,
+  is_active boolean NOT NULL,
+  CONSTRAINT certifications_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.learner_profiles (
+  user_id bigint NOT NULL,
+  target_certification_id bigint,
+  exam_date date,
+  weekly_study_hours integer,
+  experience_level character varying,
+  goals jsonb,
+  CONSTRAINT learner_profiles_pkey PRIMARY KEY (user_id),
+  CONSTRAINT learner_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT learner_profiles_target_certification_id_fkey1 FOREIGN KEY (target_certification_id) REFERENCES public.certifications(id),
+  CONSTRAINT learner_profiles_target_certification_id_fkey FOREIGN KEY (target_certification_id) REFERENCES public.certifications(id),
+  CONSTRAINT learner_profiles_user_id_fkey1 FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.conversations (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id bigint NOT NULL,
+  certification_id bigint,
+  title character varying,
+  created_at timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT conversations_pkey PRIMARY KEY (id),
+  CONSTRAINT conversations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT conversations_certification_id_fkey FOREIGN KEY (certification_id) REFERENCES public.certifications(id),
+  CONSTRAINT conversations_user_id_fkey1 FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT conversations_certification_id_fkey1 FOREIGN KEY (certification_id) REFERENCES public.certifications(id)
+);
+CREATE TABLE public.messages (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  conversation_id bigint NOT NULL,
+  role character varying NOT NULL,
+  content text NOT NULL,
+  model character varying,
+  tokens_in integer,
+  tokens_out integer,
+  created_at timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT messages_pkey PRIMARY KEY (id),
+  CONSTRAINT messages_conversation_id_fkey FOREIGN KEY (conversation_id) REFERENCES public.conversations(id),
+  CONSTRAINT messages_conversation_id_fkey1 FOREIGN KEY (conversation_id) REFERENCES public.conversations(id)
+);
+CREATE TABLE public.message_citations (
+  message_id bigint NOT NULL,
+  chunk_id bigint NOT NULL,
+  CONSTRAINT message_citations_pkey PRIMARY KEY (message_id, chunk_id),
+  CONSTRAINT message_citations_chunk_id_fkey FOREIGN KEY (chunk_id) REFERENCES public.document_chunks(id),
+  CONSTRAINT message_citations_message_id_fkey FOREIGN KEY (message_id) REFERENCES public.messages(id),
+  CONSTRAINT message_citations_message_id_fkey1 FOREIGN KEY (message_id) REFERENCES public.messages(id),
+  CONSTRAINT message_citations_chunk_id_fkey1 FOREIGN KEY (chunk_id) REFERENCES public.document_chunks(id)
+);
+CREATE TABLE public.exam_domains (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  certification_id bigint NOT NULL,
+  parent_id bigint,
+  name character varying NOT NULL,
+  weight_percent numeric,
+  CONSTRAINT exam_domains_pkey PRIMARY KEY (id),
+  CONSTRAINT exam_domains_certification_id_fkey1 FOREIGN KEY (certification_id) REFERENCES public.certifications(id),
+  CONSTRAINT exam_domains_parent_id_fkey1 FOREIGN KEY (parent_id) REFERENCES public.exam_domains(id),
+  CONSTRAINT exam_domains_certification_id_fkey FOREIGN KEY (certification_id) REFERENCES public.certifications(id),
+  CONSTRAINT exam_domains_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.exam_domains(id)
+);
+CREATE TABLE public.documents (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  certification_id bigint NOT NULL,
+  title character varying NOT NULL,
+  blob_path character varying NOT NULL,
+  status character varying NOT NULL,
+  uploaded_by bigint,
+  created_at timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT documents_pkey PRIMARY KEY (id),
+  CONSTRAINT documents_certification_id_fkey1 FOREIGN KEY (certification_id) REFERENCES public.certifications(id),
+  CONSTRAINT documents_uploaded_by_fkey1 FOREIGN KEY (uploaded_by) REFERENCES public.users(id),
+  CONSTRAINT documents_certification_id_fkey FOREIGN KEY (certification_id) REFERENCES public.certifications(id),
+  CONSTRAINT documents_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES public.users(id)
+);
+CREATE TABLE public.document_chunks (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  document_id bigint NOT NULL,
+  chunk_index integer NOT NULL,
+  content text NOT NULL,
+  metadata jsonb,
+  exam_domain_id bigint,
+  CONSTRAINT document_chunks_pkey PRIMARY KEY (id),
+  CONSTRAINT document_chunks_document_id_fkey1 FOREIGN KEY (document_id) REFERENCES public.documents(id),
+  CONSTRAINT document_chunks_document_id_fkey FOREIGN KEY (document_id) REFERENCES public.documents(id),
+  CONSTRAINT document_chunks_exam_domain_id_fkey FOREIGN KEY (exam_domain_id) REFERENCES public.exam_domains(id),
+  CONSTRAINT document_chunks_exam_domain_id_fkey1 FOREIGN KEY (exam_domain_id) REFERENCES public.exam_domains(id)
+);
+CREATE TABLE public.questions (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  certification_id bigint NOT NULL,
+  exam_domain_id bigint,
+  type character varying NOT NULL,
+  stem text NOT NULL,
+  options jsonb,
+  correct_answer jsonb NOT NULL,
+  explanation text,
+  difficulty character varying,
+  generated_by character varying NOT NULL,
+  review_status character varying NOT NULL,
+  created_at timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT questions_pkey PRIMARY KEY (id),
+  CONSTRAINT questions_certification_id_fkey FOREIGN KEY (certification_id) REFERENCES public.certifications(id),
+  CONSTRAINT questions_exam_domain_id_fkey FOREIGN KEY (exam_domain_id) REFERENCES public.exam_domains(id),
+  CONSTRAINT questions_certification_id_fkey1 FOREIGN KEY (certification_id) REFERENCES public.certifications(id),
+  CONSTRAINT questions_exam_domain_id_fkey1 FOREIGN KEY (exam_domain_id) REFERENCES public.exam_domains(id)
+);
+CREATE TABLE public.question_sources (
+  question_id bigint NOT NULL,
+  chunk_id bigint NOT NULL,
+  CONSTRAINT question_sources_pkey PRIMARY KEY (question_id, chunk_id),
+  CONSTRAINT question_sources_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id),
+  CONSTRAINT question_sources_chunk_id_fkey FOREIGN KEY (chunk_id) REFERENCES public.document_chunks(id),
+  CONSTRAINT question_sources_question_id_fkey1 FOREIGN KEY (question_id) REFERENCES public.questions(id),
+  CONSTRAINT question_sources_chunk_id_fkey1 FOREIGN KEY (chunk_id) REFERENCES public.document_chunks(id)
+);
+CREATE TABLE public.assessments (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id bigint NOT NULL,
+  certification_id bigint NOT NULL,
+  type character varying NOT NULL,
+  started_at timestamp without time zone NOT NULL,
+  completed_at timestamp without time zone,
+  score numeric,
+  CONSTRAINT assessments_pkey PRIMARY KEY (id),
+  CONSTRAINT assessments_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT assessments_certification_id_fkey FOREIGN KEY (certification_id) REFERENCES public.certifications(id),
+  CONSTRAINT assessments_user_id_fkey1 FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT assessments_certification_id_fkey1 FOREIGN KEY (certification_id) REFERENCES public.certifications(id)
+);
+CREATE TABLE public.attempts (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  assessment_id bigint NOT NULL,
+  user_id bigint NOT NULL,
+  question_id bigint NOT NULL,
+  selected_answer jsonb,
+  is_correct boolean NOT NULL,
+  time_spent_seconds integer,
+  answered_at timestamp without time zone NOT NULL,
+  CONSTRAINT attempts_pkey PRIMARY KEY (id),
+  CONSTRAINT attempts_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id),
+  CONSTRAINT attempts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT attempts_assessment_id_fkey FOREIGN KEY (assessment_id) REFERENCES public.assessments(id),
+  CONSTRAINT attempts_assessment_id_fkey1 FOREIGN KEY (assessment_id) REFERENCES public.assessments(id),
+  CONSTRAINT attempts_question_id_fkey1 FOREIGN KEY (question_id) REFERENCES public.questions(id),
+  CONSTRAINT attempts_user_id_fkey1 FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.progress (
+  user_id bigint NOT NULL,
+  exam_domain_id bigint NOT NULL,
+  mastery_score numeric NOT NULL,
+  questions_answered integer NOT NULL DEFAULT 0,
+  last_activity_at timestamp without time zone NOT NULL,
+  CONSTRAINT progress_pkey PRIMARY KEY (user_id, exam_domain_id),
+  CONSTRAINT progress_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT progress_exam_domain_id_fkey FOREIGN KEY (exam_domain_id) REFERENCES public.exam_domains(id),
+  CONSTRAINT progress_user_id_fkey1 FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT progress_exam_domain_id_fkey1 FOREIGN KEY (exam_domain_id) REFERENCES public.exam_domains(id)
+);
+CREATE TABLE public.enrollments (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id bigint NOT NULL,
+  certification_id bigint NOT NULL,
+  goal text,
+  deadline date,
+  weekly_study_hours numeric CHECK (weekly_study_hours IS NULL OR weekly_study_hours > 0::numeric AND weekly_study_hours <= 168::numeric),
+  status character varying NOT NULL DEFAULT 'active'::character varying CHECK (status::text = ANY (ARRAY['active'::character varying, 'paused'::character varying, 'completed'::character varying, 'abandoned'::character varying]::text[])),
+  created_at timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT enrollments_pkey PRIMARY KEY (id),
+  CONSTRAINT enrollments_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT enrollments_certification_id_fkey FOREIGN KEY (certification_id) REFERENCES public.certifications(id)
+);
