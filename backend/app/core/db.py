@@ -35,13 +35,13 @@ def _build_engine() -> AsyncEngine:
 
     return create_async_engine(
         url,
-        echo=getattr(settings, "db_echo", False),
-        pool_size=5,
-        max_overflow=5,
-        pool_pre_ping=True,   # drop dead connections automatically
-        pool_recycle=1800,
-        
-        # (port 5432, PgBouncer): it does not support prepared statements.
+        echo=settings.db_echo,
+        pool_size=settings.db_pool_size,
+        max_overflow=settings.db_max_overflow,
+        pool_pre_ping=True,  # drop dead connections automatically
+        pool_recycle=settings.db_pool_recycle_seconds,
+        # Supabase's pooler (PgBouncer) does not support prepared statements.
+        connect_args={"statement_cache_size": settings.db_statement_cache_size},
     )
 
 
