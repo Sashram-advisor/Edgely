@@ -8,6 +8,7 @@ no credentials are ever hard-coded here.
 
 from collections.abc import AsyncGenerator
 from typing import Any
+import logging
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
@@ -20,6 +21,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings  # settings.database_url, settings.db_echo (see config.py)
 
+logger = logging.getLogger(__name__)
 
 class Base(DeclarativeBase):
     """Base class for all ORM models in models/ (user.py, quiz.py, ...)."""
@@ -41,7 +43,10 @@ def _build_engine() -> AsyncEngine:
         pool_pre_ping=True,  # drop dead connections automatically
         pool_recycle=settings.db_pool_recycle_seconds,
         # Supabase's pooler (PgBouncer) does not support prepared statements.
-        connect_args={"statement_cache_size": settings.db_statement_cache_size},
+        connect_args={
+            "statement_cache_size": settings.db_statement_cache_size,
+            "prepared_statement_cache_size": settings.db_statement_cache_size,
+        },
     )
 
 
@@ -61,15 +66,11 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         @router.get("/dashboard")
         async def dashboard(db: AsyncSession = Depends(get_db)):
             ...
-    Commits on success, rolls back on any exception.
+    Does not commit. Services that write data call `await db.commit()` themselves.
+    Closing the session discards anything uncommitted.
     """
     async with SessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
+        yield session
 
 
 # --------------------------------------------------------------------------
@@ -111,6 +112,7 @@ async def check_connection() -> bool:
             await conn.execute(text("SELECT 1"))
         return True
     except Exception:
+        logger.exception("Database connection check failed")
         return False
 
 

@@ -7,10 +7,10 @@ Other modules import `settings` from here. Secrets stay in backend/.env.
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 # backend/ directory. The real .env lives here, not next to this file.
 _BACKEND_ROOT = Path(__file__).resolve().parents[2]
@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     # Allowed frontend origins for CORS (Next.js dev server by default).
     # main.py passes this list to CORSMiddleware.
     # .env may use a comma-separated list or a JSON list.
-    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    cors_origins: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["http://localhost:3000"])
 
     @field_validator("cors_origins", mode="before")
     @classmethod
