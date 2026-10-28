@@ -39,6 +39,11 @@ class Settings(BaseSettings):
     # Supabase's pooler rejects prepared statements. 0 turns that cache off.
     db_statement_cache_size: int = 0
 
+    # Supabase Auth (used by core/auth_provider.py to verify login tokens)
+    supabase_url: str | None = None
+    # Only needed if your project signs tokens with the older shared secret (HS256).
+    supabase_jwt_secret: str | None = None
+
     # AI team: fill these in backend/.env. Leave them blank until your code reads them.
     # Import `settings` from this module. The files below are still empty.
     #
