@@ -7,9 +7,9 @@ export default function HomePage() {
   return (
     <>
 <header className={menuOpen ? "site-header open" : "site-header"}>
-<a className="brand" href="#top" aria-label="Certiva AI home">
+<a className="brand" href="#top" aria-label="Edgely home">
 <span className="brand-mark" aria-hidden="true">C</span>
-<span>Certiva AI</span>
+<span>Edgely</span>
 </a>
 <button className="menu-btn" aria-label="Open menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "✕" : "☰"}</button>
 <nav className="nav" aria-label="Main navigation" onClick={() => setMenuOpen(false)}>
@@ -117,7 +117,7 @@ export default function HomePage() {
 <h2>More than a chatbot.<br />A learning system that adapts.</h2>
 </div>
 <p>
-          Instead of sending every learner through the same course, Certiva AI uses your goals, assessment results, and learning history to decide what you should focus on next.
+          Instead of sending every learner through the same course, Edgely uses your goals, assessment results, and learning history to decide what you should focus on next.
         </p>
 </div>
 <div className="feature-grid">
@@ -195,7 +195,7 @@ export default function HomePage() {
 <h2>Your learning platform should do more than answer questions.</h2>
 </div>
 <div className="why-copy">
-<p>Traditional prep tools give you content. Generic AI gives you answers. Certiva AI connects tutoring, assessment, planning, and progress so the system can act on what it learns about you.</p>
+<p>Traditional prep tools give you content. Generic AI gives you answers. Edgely connects tutoring, assessment, planning, and progress so the system can act on what it learns about you.</p>
 <a className="btn btn-light" href="#get-started">Explore the experience →</a>
 </div>
 </div>
@@ -212,7 +212,7 @@ export default function HomePage() {
 </section>
 </main>
 <footer className="footer shell">
-<a className="brand" href="#top"><span className="brand-mark">C</span><span>Certiva AI</span></a>
+<a className="brand" href="#top"><span className="brand-mark">E</span><span>Edgely</span></a>
 <p>Agentic AI-powered certification learning.</p>
 <div><a href="#features">Features</a><a href="#paths">Paths</a><a href="#about">About</a></div>
 </footer>
