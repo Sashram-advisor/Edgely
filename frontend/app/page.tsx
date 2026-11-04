@@ -2,11 +2,6 @@
 
 import { useState } from "react";
 
-/**
- * Certiva AI sample marketing homepage.
- * Frontend prototype only: the metrics and product examples below are sample content.
- * Replace placeholder CTA destinations after your team defines the routes.
- */
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
