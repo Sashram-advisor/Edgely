@@ -1,0 +1,109 @@
+AWS Certified Cloud Practitioner — Study Material
+
+Topic 1: Amazon EC2
+
+Amazon Elastic Compute Cloud (EC2) is an AWS service that provides virtual servers in the cloud. Users can choose the server's operating system, computing power, memory, and storage configuration.
+
+Beginner explanation: EC2 is like renting a computer over the internet instead of buying a physical computer.
+
+Intermediate explanation: EC2 provides resizable computing capacity. Users can launch virtual server instances and adjust their configurations to meet application requirements.
+
+Advanced explanation: EC2 provides configurable compute instances that can be integrated with networking, storage, security, and scaling services to support different application workloads.
+
+Real-world example: An online store might use EC2 instances to run its website. During a major sale, it could add instances to handle more visitors and reduce capacity when traffic decreases.
+
+Practice question: Which AWS service provides resizable virtual servers?
+
+A. Amazon S3
+B. Amazon EC2
+C. Amazon RDS
+D. AWS CloudTrail
+
+Correct answer: B. Amazon EC2.
+
+Explanation: EC2 provides virtual computing capacity. S3 is primarily object storage, RDS is a managed relational database service, and CloudTrail records account activity and API events.
+
+Topic 2: Amazon S3
+
+Amazon Simple Storage Service (S3) is an object storage service used to store and retrieve data, such as images, documents, backups, and application files.
+
+Beginner explanation: S3 is like an online storage space where you can keep files and retrieve them when needed.
+
+Intermediate explanation: S3 stores data as objects inside buckets. It supports features such as access controls, versioning, and lifecycle policies.
+
+Advanced explanation: S3 provides scalable object storage with configurable access management, storage classes, lifecycle automation, and durability features for a range of data workloads.
+
+Real-world example: An online store could store product images in S3 and retrieve them when customers view product pages.
+
+Practice question: Which AWS service is primarily designed for object storage?
+
+A. Amazon EC2
+B. Amazon S3
+C. Amazon VPC
+D. Amazon Route 53
+
+Correct answer: B. Amazon S3.
+
+Explanation: S3 stores objects such as images and documents. EC2 provides compute capacity, VPC provides virtual networking, and Route 53 provides DNS and domain-routing services.
+
+Topic 3: AWS Shared Responsibility Model
+
+The AWS Shared Responsibility Model explains how security responsibilities are divided between AWS and the customer.
+
+AWS is responsible for security of the cloud, including the physical infrastructure, hardware, and facilities that support AWS services.
+
+Customers are responsible for security in the cloud. Depending on the service, this can include managing identities and permissions, protecting data, configuring network access, and maintaining operating systems.
+
+Beginner explanation: AWS protects the cloud infrastructure, while customers must protect what they put in the cloud and how they configure their services.
+
+Intermediate explanation: The exact division of responsibility depends on the AWS service. For example, customers manage more operating-system responsibilities on EC2 than they do when using a fully managed service.
+
+Real-world example: A company using EC2 must manage access permissions and maintain its guest operating system. AWS manages the underlying physical infrastructure.
+
+Practice question: Under the Shared Responsibility Model, who is responsible for managing customer IAM permissions?
+
+A. AWS only
+B. The customer
+C. The internet service provider
+D. No one
+
+Correct answer: B. The customer.
+
+Explanation: Customers are responsible for configuring their identities, permissions, and access policies appropriately.
+
+Topic 4: AWS Pricing and Cost Management
+
+AWS offers different pricing approaches depending on the service and usage pattern.
+
+On-Demand pricing allows customers to pay for computing capacity without making a long-term commitment. Savings Plans can reduce eligible compute costs in exchange for a commitment to a consistent amount of usage over a specified term. AWS Budgets can help customers monitor costs and receive alerts when defined thresholds are reached.
+
+Beginner explanation: AWS lets customers pay for what they use, and some pricing options offer discounts in exchange for commitments.
+
+Intermediate explanation: Selecting an appropriate pricing model depends on workload predictability, flexibility requirements, and the willingness to commit to usage over time.
+
+Real-world example: A company testing a new application might start with On-Demand resources. After its workload becomes predictable, it could evaluate Savings Plans to reduce eligible compute costs.
+
+Practice question: Which AWS service can notify a customer when spending reaches a defined budget threshold?
+
+A. AWS Budgets
+B. Amazon EC2
+C. Amazon S3
+D. AWS IAM
+
+Correct answer: A. AWS Budgets.
+
+Explanation: AWS Budgets supports cost and usage monitoring, including alerts based on configured thresholds.
+
+Tutor Instructions
+
+When answering questions using this study material:
+
+Adjust explanations to the beginner, intermediate, or advanced level requested by the learner.
+
+Give a practical real-world example when requested.
+
+When creating quizzes, provide multiple-choice answers and explain why the correct answer is correct.
+
+Use this material as a source, and distinguish general AWS knowledge from information specifically contained in this file.
+
+If the learner asks something this material does not cover, acknowledge that the file does not contain enough information rather than claiming the answer came from the file.
