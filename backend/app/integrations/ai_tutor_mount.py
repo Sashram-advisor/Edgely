@@ -17,6 +17,7 @@ The function is cached because importing the app creates module-level state
 from __future__ import annotations
 
 import importlib.util
+import os
 import sys
 from functools import lru_cache
 from pathlib import Path
@@ -26,12 +27,17 @@ from fastapi import FastAPI
 # backend/app/integrations/ai_tutor_mount.py -> repo root is parents[3]
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _AI_TUTOR_APP = _REPO_ROOT / "services" / "ai_tutor" / "backend" / "app"
+_BACKEND_ROOT = Path(__file__).resolve().parents[2]
 _PACKAGE_NAME = "edgely_ai_tutor"
 
 
 @lru_cache(maxsize=1)
 def get_ai_tutor_app() -> FastAPI:
     """Return the untouched AI Tutor FastAPI application."""
+    
+    # The tutor reads settings from ".env" in the current folder plus the file named by ENV_FILE.
+    # Point ENV_FILE at backend/.env so both halves read the same file from any folder.
+    os.environ.setdefault("ENV_FILE", str(_BACKEND_ROOT / ".env"))
 
     main_file = _AI_TUTOR_APP / "main.py"
     if not main_file.is_file():
