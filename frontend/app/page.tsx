@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+import "./homepage.css";
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -8,7 +10,7 @@ export default function HomePage() {
     <>
 <header className={menuOpen ? "site-header open" : "site-header"}>
 <a className="brand" href="#top" aria-label="Edgely home">
-<span className="brand-mark" aria-hidden="true">C</span>
+<span className="brand-mark" aria-hidden="true">E</span>
 <span>Edgely</span>
 </a>
 <button className="menu-btn" aria-label="Open menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "✕" : "☰"}</button>
@@ -19,8 +21,8 @@ export default function HomePage() {
 <a href="#about">About</a>
 </nav>
 <div className="header-actions">
-<a className="text-link" href="#login">Log in</a>
-<a className="btn btn-dark btn-small" href="#get-started">Get started</a>
+<Link className="text-link" href="/login">Log in</Link>
+<Link className="btn btn-dark btn-small" href="/register">Get started</Link>
 </div>
 </header>
 <main id="top">
@@ -32,7 +34,7 @@ export default function HomePage() {
           Meet an AI tutor, coach, and assessor that learns how you learn — then builds a study path around your goals, weak areas, and exam date.
         </p>
 <div className="hero-actions">
-<a className="btn btn-accent" href="#get-started">Start your learning path</a>
+<Link className="btn btn-accent" href="/register">Start your learning path</Link>
 <a className="btn btn-ghost" href="#how">See how it works <span aria-hidden="true">→</span></a>
 </div>
 <div className="trust-row" aria-label="Platform highlights">
@@ -52,7 +54,7 @@ export default function HomePage() {
 </div>
 <div className="app-body">
 <aside className="app-sidebar">
-<div className="mini-logo">C</div>
+<div className="mini-logo">E</div>
 <span className="side-active">⌂</span>
 <span>◫</span>
 <span>✦</span>
@@ -207,7 +209,7 @@ export default function HomePage() {
 </div>
 <div>
 <p>Build a personalized learning path around your goals and turn every study session into measurable progress.</p>
-<a className="btn btn-dark" href="#get-started">Create your learning path</a>
+<Link className="btn btn-dark" href="/register">Create your learning path</Link>
 </div>
 </section>
 </main>
@@ -216,7 +218,6 @@ export default function HomePage() {
 <p>Agentic AI-powered certification learning.</p>
 <div><a href="#features">Features</a><a href="#paths">Paths</a><a href="#about">About</a></div>
 </footer>
-<script src="script.js"></script>
     </>
   );
 }
