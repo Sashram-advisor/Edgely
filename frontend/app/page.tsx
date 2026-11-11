@@ -126,7 +126,7 @@ export default function HomePage() {
 <article className="feature feature-large feature-dark">
 <div className="feature-icon">✦</div>
 <div>
-<p className="feature-number">1</p>
+<p className="feature-number">01</p>
 <h3>AI Tutor + Coach</h3>
 <p>Ask questions naturally, get explanations at your level, and receive coaching when your progress slows down.</p>
 </div>
@@ -137,7 +137,7 @@ export default function HomePage() {
 </article>
 <article className="feature">
 <div className="feature-icon soft">◎</div>
-<p className="feature-number">2</p>
+<p className="feature-number">02</p>
 <h3>Knowledge assessment</h3>
 <p>Start with a diagnostic so the platform knows what you already understand and what needs attention.</p>
 <div className="meter"><span style={{ width: "68%" }}></span></div>
@@ -145,7 +145,7 @@ export default function HomePage() {
 </article>
 <article className="feature">
 <div className="feature-icon soft">↗</div>
-<p className="feature-number">3</p>
+<p className="feature-number">03</p>
 <h3>Adaptive study plan</h3>
 <p>Your plan changes when you improve, miss sessions, or struggle with a topic — so your time stays focused.</p>
 <div className="mini-plan">
@@ -157,7 +157,7 @@ export default function HomePage() {
 <article className="feature feature-wide">
 <div>
 <div className="feature-icon soft">◫</div>
-<p className="feature-number">4</p>
+<p className="feature-number">04</p>
 <h3>Practice that finds patterns</h3>
 <p>Adaptive quizzes and exam-style practice help the platform identify recurring weaknesses instead of treating every wrong answer the same.</p>
 </div>
