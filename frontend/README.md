@@ -1,20 +1,31 @@
-# Frontend scaffold
+**This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-This directory is Edgely's original Next.js scaffold (`app/`, `components/`,
-`hooks/`, `types/`, `utilities/`). It was empty at the merge baseline and is
-left untouched.
+## Getting Started
 
-The working UI for the merged tutor is `../ui/merged_app.py` (Streamlit). It
-was added rather than filling in this scaffold, because inventing a Next.js
-application would have changed the scope of the merge and could not be verified
-against the original repository.
+First, run the development server:
 
-When the frontend team is ready, the backend contract is:
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-* `POST /ai-tutor/chat/stream` — SSE course tutor
-* `GET /ai-tutor/users` and `/ai-tutor/users/{id}/context`
-* `GET /ai-tutor/users/{id}/conversations`
-* `GET /ai-tutor/conversations/{id}/messages`
-* `POST /local-tutor/chat` — non-streaming local Ollama tutor
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-See `docs/AI_TUTOR_MERGE.md` for the full endpoint map.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**
