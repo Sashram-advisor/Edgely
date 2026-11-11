@@ -1,0 +1,41 @@
+name: edgely-merged
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: integrations/Dockerfile.backend
+    env_file:
+      - ../backend/.env
+    environment:
+      # The local bridge uses the compose-network name when Ollama runs here.
+      # If you run Ollama on the host instead, remove this override and use
+      # OLLAMA_BASE_URL=http://host.docker.internal:11434 in backend/.env.
+      OLLAMA_BASE_URL: http://ollama:11434
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ..
+      dockerfile: integrations/Dockerfile.ui
+    environment:
+      API_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["local-ai"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  ollama:

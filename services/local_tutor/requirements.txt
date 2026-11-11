@@ -1,0 +1,4 @@
+# Dependencies for the original Ai Tutor.zip CLI (main.py).
+# The merged HTTP bridge does not need these; it calls Ollama over HTTP.
+ollama>=0.4,<1.0
+numpy>=2.0,<3.0
