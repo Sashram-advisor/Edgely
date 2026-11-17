@@ -1,0 +1,33 @@
+.intro{margin-bottom:22px}
+.intro h1{font-family:Georgia,'Times New Roman',serif;font-weight:500;font-size:31px;letter-spacing:-1px;color:#19392d;margin:0}
+.intro p{margin:8px 0 0;font-size:13px;color:#728176}
+.notice{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#eef6e2;border:1px solid #d9e9c6;color:#2f5b3b;border-radius:12px;padding:12px 16px;font-size:12px;margin-bottom:18px}
+.notice a{font-weight:800;color:#24533a;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.sectionTitle{font-family:Georgia,serif;font-weight:500;font-size:22px;color:#1d3f32;margin:26px 0 12px}
+.empty{padding:22px;color:#7b887d;font-size:12px}
+.enrollments{display:grid;gap:10px}
+.enrollment{display:flex;align-items:center;gap:14px;padding:16px 18px;flex-wrap:wrap}
+.enrollmentMain{flex:1;min-width:200px}
+.enrollmentMain strong{display:block;font-size:14px;color:#21432f}
+.enrollmentMeta{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px;font-size:11px;color:#7d8c80}
+.enrollmentMeta span{display:inline-flex;align-items:center;gap:5px}
+.status{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:5px 9px;border-radius:30px;white-space:nowrap}
+.status_active{background:#e6f2d8;color:#3f6f34}
+.status_paused{background:#f6ecd8;color:#8a6424}
+.status_completed{background:#e3ecf5;color:#365a7d}
+.status_abandoned{background:#efefec;color:#7a7f78}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.action{border:1px solid #e2e8dc;background:#f6f8f1;color:#3f6449;padding:8px 10px;border-radius:8px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.action:disabled{opacity:.5;cursor:not-allowed}
+.danger{color:#93502f;border-color:#efdccf;background:#fbf4ef}
+.catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.cert{padding:20px;display:flex;flex-direction:column;gap:8px;min-height:190px}
+.cert h3{font-family:Georgia,serif;font-weight:500;font-size:18px;color:#21432f;margin:0}
+.slug{font-size:11px;color:#8a998c;font-family:var(--font-geist-mono),monospace}
+.cert p{font-size:12px;line-height:1.6;color:#6f7f73;margin:0;flex:1}
+.certFoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+.enrollButton{border:0;background:#1e5138;color:#fff;padding:10px 14px;border-radius:9px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;gap:7px}
+.formGrid{display:grid;gap:4px}
+.hint{font-size:11px;color:#8a978c;margin:6px 0 0}
+.error{background:#fbefe9;color:#8d3f22;border-radius:9px;padding:10px 12px;font-size:12px;margin-top:14px}
+@media(max-width:680px){.intro h1{font-size:26px}.enrollment{align-items:flex-start}.actions{width:100%}}
