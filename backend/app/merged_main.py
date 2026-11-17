@@ -5,10 +5,11 @@ Run this instead of ``app.main:app`` to get the original Edgely API plus the AI 
     cd backend
     uvicorn app.merged_main:app --reload --port 8000
 
-* Edgely's original app (``app.main:app``) is the host and is not edited.
+* Edgely's original app (``app.main:app``) is the host. Workstream A only added the
+  ``/users`` router registration there; composition otherwise stays in this file.
 * ``/tutor/*`` are the authenticated tutor routes (backend/app/routes/tutor.py).
-* ``/ai-tutor/*`` is the tutor's own unauthenticated app. It is mounted only when APP_ENV=local,
-  because it trusts a user_id sent by the caller. The Streamlit dev UI uses it.
+* ``/ai-tutor/*`` is the tutor's own unauthenticated app. It is mounted only when APP_ENV=local AND
+  ENABLE_LEGACY_TUTOR_MOUNT=true, because it trusts a user_id sent by the caller. The Streamlit dev UI uses it.
 * ``/local-tutor/*`` is the optional offline Ollama bridge.
 
 If the tutor cannot start (missing package or missing settings) Edgely still starts, the problem is
@@ -40,7 +41,10 @@ try:
     _tutor_settings()
 
     app.include_router(tutor_routes.router, prefix="/tutor", tags=["tutor"])
-    if settings.app_env == "local":
+    # Two switches, not one: local environment AND an explicit opt-in flag.
+    # This keeps the unauthenticated tutor out of a misconfigured deployment
+    # whose APP_ENV was accidentally left at "local".
+    if settings.legacy_tutor_mount_enabled:
         app.mount("/ai-tutor", tutor_app, name="ai-tutor")
     tutor_ready = True
 except Exception as exc:  # noqa: BLE001 - any failure must leave Edgely running
@@ -78,6 +82,6 @@ def merged_service_index() -> dict[str, object]:
     }
     if tutor_ready:
         index["tutor_chat"] = "/tutor/chat"
-        if settings.app_env == "local":
+        if settings.legacy_tutor_mount_enabled:
             index["ai_tutor_dev_docs"] = "/ai-tutor/docs"
     return index
