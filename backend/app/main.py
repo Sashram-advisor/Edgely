@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.db import check_connection, close_db
+from app.routes import users as users_routes
 
 
 @asynccontextmanager
@@ -29,9 +30,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register routers here as they are built, e.g.:
-# from routers import chat, quizzes, dashboard, enrollments, documents
-# app.include_router(chat.router, prefix="/chat", tags=["chat"])
+# Register routers here as they are built. Each router owns its own prefix and
+# tags so this file stays a thin composition root.
+app.include_router(users_routes.router)
 
 
 @app.get("/health")

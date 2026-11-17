@@ -13,10 +13,8 @@ from dataclasses import asdict
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth_provider import AuthenticatedUser, get_current_auth_user
-from app.core.db import fetch_one, get_db
+from app.core.dependencies import current_user_id
 from app.integrations.ai_tutor_mount import get_ai_tutor_app
 
 router = APIRouter()
@@ -42,21 +40,6 @@ def tutor_errors():
         raise HTTPException(404, f"Conversation {exc} not found") from exc
     except context.UserNotFound as exc:
         raise HTTPException(404, f"User {exc} not found") from exc
-
-
-async def current_user_id(
-    auth: AuthenticatedUser = Depends(get_current_auth_user),
-    db: AsyncSession = Depends(get_db),
-) -> int:
-    """Map the verified login to users.id. This is the only source of the user id."""
-    row = await fetch_one(
-        db,
-        "SELECT id FROM users WHERE external_auth_id = :auth_id",
-        {"auth_id": auth.auth_id},
-    )
-    if row is None:
-        raise HTTPException(403, "No platform user exists for this login")
-    return row["id"]
 
 
 class ChatBody(BaseModel):

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from app.core import dependencies as auth_dependencies
 from app.core.auth_provider import AuthenticatedUser, get_current_auth_user
 from app.core.db import get_db
 from app.merged_main import app
@@ -51,7 +52,7 @@ def test_user_id_comes_from_the_token_not_the_body(monkeypatch) -> None:
         seen["user_id"] = req.user_id
         return {"answer": "ok"}
 
-    monkeypatch.setattr(tutor_routes, "fetch_one", fake_fetch_one)
+    monkeypatch.setattr(auth_dependencies, "fetch_one", fake_fetch_one)
     chat_module, _, _ = tutor_routes._tutor()
     monkeypatch.setattr(chat_module, "chat_turn", fake_chat_turn)
 
@@ -66,7 +67,7 @@ def test_login_without_a_platform_user_is_403(monkeypatch) -> None:
     async def fake_fetch_one(db, sql, params=None):
         return None
 
-    monkeypatch.setattr(tutor_routes, "fetch_one", fake_fetch_one)
+    monkeypatch.setattr(auth_dependencies, "fetch_one", fake_fetch_one)
     response = _client_logged_in_as("nobody").post("/tutor/chat", json={"message": "hi"})
     assert response.status_code == 403
 
@@ -78,7 +79,7 @@ def test_not_enrolled_becomes_403(monkeypatch) -> None:
     def raise_not_enrolled(req):
         raise tutor_routes._tutor()[0].NotEnrolled("not enrolled")
 
-    monkeypatch.setattr(tutor_routes, "fetch_one", fake_fetch_one)
+    monkeypatch.setattr(auth_dependencies, "fetch_one", fake_fetch_one)
     monkeypatch.setattr(tutor_routes._tutor()[0], "chat_turn", raise_not_enrolled)
     response = _client_logged_in_as("auth-abc").post("/tutor/chat", json={"message": "hi"})
     assert response.status_code == 403

@@ -25,7 +25,13 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    app_env: Literal["local", "development", "production"] = "local"
+    # Default to the safe value. Local development must opt in explicitly by
+    # setting APP_ENV=local in backend/.env (see .env.example).
+    app_env: Literal["local", "development", "production"] = "production"
+    # The original AI tutor app has no authentication of its own. It is mounted
+    # at /ai-tutor only when BOTH conditions below are true: this flag is on and
+    # the environment is local. Never enable it in a deployed environment.
+    enable_legacy_tutor_mount: bool = False
     app_name: str = "Sashram Agentic AI Certification Platform"
 
     # Supabase PostgreSQL connection string (never commit the real value).
@@ -74,6 +80,15 @@ class Settings(BaseSettings):
     # main.py passes this list to CORSMiddleware.
     # .env may use a comma-separated list or a JSON list.
     cors_origins: Annotated[list[str], NoDecode] = Field(default_factory=lambda: ["http://localhost:3000"])
+
+    @property
+    def legacy_tutor_mount_enabled(self) -> bool:
+        """True only for a local run that explicitly opted into the legacy app.
+
+        Keeping this rule in one property means the merge entry point and the
+        index route cannot disagree about whether /ai-tutor is exposed.
+        """
+        return self.app_env == "local" and self.enable_legacy_tutor_mount
 
     @field_validator("cors_origins", mode="before")
     @classmethod
