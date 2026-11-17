@@ -10,14 +10,9 @@ from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_db
+from app.core.dependencies import current_user_id
 from app.schemas.enrollment import EnrollmentCreate, EnrollmentOut, EnrollmentUpdate
 from app.services import enrollment_service
-
-try:
-    # Shared dependency from the identity workstream (core/dependencies.py).
-    from app.core.dependencies import current_user_id
-except ImportError:  # until it lands, use the same function where it lives today
-    from app.routes.tutor import current_user_id
 
 router = APIRouter(prefix="/enrollments", tags=["enrollments"])
 

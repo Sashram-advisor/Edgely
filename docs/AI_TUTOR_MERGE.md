@@ -87,35 +87,71 @@ The two engines are intentionally separate at the edges:
 
 ## 3. Endpoint map
 
+**Authenticated routes** - these are what clients use. Every one needs a
+Supabase access token (`Authorization: Bearer <token>`); the learner always
+comes from the token, never from the body. Full contract:
+[docs/api/m1-contract.md](api/m1-contract.md).
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| POST | `/users/me` | Create my platform user on first login (idempotent) |
+| GET / PATCH | `/users/me` | Read / update my profile |
+| GET | `/certifications` | Active certification catalog |
+| GET | `/enrollments/me` | My enrollments |
+| POST | `/enrollments` | Enroll in a certification |
+| PATCH | `/enrollments/{id}` | Pause, resume, complete or abandon |
+| POST | `/tutor/chat` | Tutor answer (JSON) |
+| POST | `/tutor/chat/stream` | Tutor answer (SSE: `meta`, `delta`*, `done` or `error`) |
+| GET | `/tutor/me/context` | My learner context as the tutor sees it |
+| GET | `/tutor/conversations` | My conversations, newest first |
+| GET | `/tutor/conversations/{id}/messages` | Messages and citations of my conversation |
+
+A valid token with no platform user yet gets `403` - call `POST /users/me`
+once. A learner with no active enrollment gets `403` from the tutor routes.
+
+**Unauthenticated routes**
+
 | Method | Path | Source |
 | --- | --- | --- |
-| GET | `/health` | Edgely (unchanged) |
-| GET | `/docs` | Edgely merged OpenAPI (includes `/local-tutor`) |
-| GET | `/ai-tutor/docs` | AI Tutor's own OpenAPI |
-| POST | `/ai-tutor/chat` | AI Tutor (unchanged) |
-| POST | `/ai-tutor/chat/stream` | AI Tutor (unchanged, SSE) |
-| GET | `/ai-tutor/users` | AI Tutor (unchanged) |
-| GET | `/ai-tutor/users/{id}/context` | AI Tutor (unchanged) |
-| GET | `/ai-tutor/users/{id}/conversations` | AI Tutor (unchanged) |
-| GET | `/ai-tutor/conversations/{id}/messages` | AI Tutor (unchanged) |
-| GET | `/local-tutor/health` | New bridge |
-| GET | `/local-tutor/material` | New bridge (section inventory) |
-| POST | `/local-tutor/chat` | New bridge |
+| GET | `/health` | Edgely |
+| GET | `/health/tutor` | `ok` / `disabled` / `error` |
+| GET | `/docs` | Edgely merged OpenAPI |
+| GET | `/local-tutor/health`, `/local-tutor/material` | Local bridge |
+| POST | `/local-tutor/chat` | Local bridge |
+| * | `/ai-tutor/*` | **Legacy, local only - see below** |
 
-The AI Tutor's internal paths are unchanged; only the mount prefix is new. This
-is why its Streamlit UI works with a single `API_URL` that includes
-`/ai-tutor`.
+### The legacy `/ai-tutor` mount
+
+The upstream AI Tutor app trusts a `user_id` sent by the caller and
+`GET /ai-tutor/users` lists every learner's email. It is mounted **only** when
+both of these are set in `backend/.env`:
+
+```
+APP_ENV=local
+ENABLE_LEGACY_TUTOR_MOUNT=true
+```
+
+`APP_ENV` defaults to `production` in code, and in production the mount stays
+off even if the flag is true. Turn it on only on your own machine, and only for
+the Streamlit UIs below. Its internal paths are unchanged; only the mount prefix
+is new.
 
 ## 4. Database changes
 
-Edgely's base schema already has every table the AI Tutor expects, except the
-pgvector/citation additions. Apply:
+The whole schema is built with Alembic, in one command, from `backend/`:
 
-```
-backend/app/database/migrations/20261102000100_ai_tutor_pgvector.sql
+```powershell
+cd backend
+python -m alembic upgrade head
 ```
 
-in the Supabase SQL editor (or with `supabase db push` if the project is linked).
+It reads `DATABASE_URL` from `backend/.env`. The baseline revision applies
+`Database_inital` and the pgvector file below; the next revision adds the
+hot-path indexes. Running it again is a no-op. `Database_inital` on its own is
+also safe to re-run (its foreign keys are only added when missing).
+
+The pgvector part is
+`backend/app/database/migrations/20261102000100_ai_tutor_pgvector.sql`.
 It is idempotent and only adds:
 
 * `document_chunks.embedding extensions.vector(1536)`
@@ -159,6 +195,13 @@ Required for the local tutor:
 * `ollama pull nomic-embed-text`
 * `ollama pull llama3.2:3b`
 
+Environment switches:
+
+* `APP_ENV` - `local`, `development` or `production`. The code default is
+  `production`; `.env.example` sets `local` for development machines.
+* `ENABLE_LEGACY_TUTOR_MOUNT` - `false` by default. Mounts the unauthenticated
+  `/ai-tutor` app only together with `APP_ENV=local` (see section 3).
+
 Optional Edgely-only values (`SUPABASE_JWT_SECRET`, Azure/OpenAI settings,
 `CORS_ORIGINS`, pool sizes) are documented inline in `.env.example`.
 
@@ -184,7 +227,9 @@ streamlit run ui/merged_app.py
 ```
 
 Open <http://localhost:8501>. The sidebar switches between **Course tutor** and
-**Local Ollama**.
+**Local Ollama**. The Streamlit UIs call the legacy `/ai-tutor` mount, so
+**Course tutor** mode needs `APP_ENV=local` and `ENABLE_LEGACY_TUTOR_MOUNT=true`
+in `backend/.env` (local machines only).
 
 The original AI Tutor UI is still available unchanged:
 
@@ -245,27 +290,32 @@ python main.py
 
 ## 7. Tests
 
-Offline checks (no database, no API keys, no Ollama):
+Offline checks (no database, no API keys, no Ollama), from the repository root:
 
 ```powershell
 pip install -r requirements-dev.txt
-pytest -q integration_tests
+pytest -q integration_tests backend/tests
 ```
 
-They assert that:
+They cover the merge structure, the `/ai-tutor` safety switches, the
+`/users`, `/certifications` and `/enrollments` routes, and `link_user.py`.
 
-* Edgely's `/health` and docs routes still exist,
-* the AI Tutor app is mounted and its relative imports survived relocation,
-* all `/local-tutor` routes are registered,
-* the zip study material is split into topic sections,
-* cosine similarity and citation parsing behave correctly,
-* the pgvector migration contains the required additions.
+Database tests are skipped unless you point them at a **disposable** Postgres
+(they create and drop their own schema or database):
+
+```powershell
+$env:EDGELY_TEST_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/edgely_test"
+$env:EDGELY_TEST_ADMIN_URL    = "postgresql://postgres:postgres@localhost:5432/postgres"  # migration test
+pytest -q backend/tests
+```
+
+Shared fixtures (`run_db`, `seed_sql`) live in `backend/tests/conftest.py`.
 
 With live services, smoke-test manually:
 
 ```powershell
 curl http://localhost:8000/health
-curl http://localhost:8000/ai-tutor/users
+curl http://localhost:8000/health/tutor
 curl http://localhost:8000/local-tutor/health
 ```
 
@@ -273,11 +323,12 @@ Then use the UI for a streaming course answer and a local Ollama answer.
 
 ## 8. Deliberate limitations / notes for the next team
 
-1. **No auth on tutor routes.** The upstream AI Tutor has no authentication and
-   takes `user_id` from the request body. Edgely's `core/auth_provider.py` is
-   available but is not wired into these routes because that would require
-   editing vendored code. Do not expose `/ai-tutor` publicly until a wrapper or
-   dependency is added.
+1. **The upstream tutor app has no auth; use `/tutor/*`.** The vendored app
+   takes `user_id` from the request body. The authenticated wrapper in
+   `backend/app/routes/tutor.py` (`/tutor/*`) takes the learner from the
+   Supabase token instead. The raw app is only mounted at `/ai-tutor` with
+   `APP_ENV=local` and `ENABLE_LEGACY_TUTOR_MOUNT=true`; never enable that on a
+   deployed server.
 2. **Two database access styles.** Edgely uses SQLAlchemy/asyncpg; the AI Tutor
    uses Supabase PostgREST. Both point at the same database, but the AI Tutor
    needs `SUPABASE_URL`/`SUPABASE_SECRET_KEY` in addition to `DATABASE_URL`.
@@ -293,15 +344,13 @@ Then use the UI for a streaming course answer and a local Ollama answer.
    were not invented or modified here.
 6. **Local tutor responses are non-streaming.** The bridge returns one JSON
    answer; the course tutor keeps its original SSE streaming endpoint.
-7. **No git commit/push.** The `.git` directory is the original Edgely clone;
-   the merge is intentionally left as uncommitted working-tree changes.
-
 ## 9. Handoff checklist
 
 - [ ] Copy `backend/.env.example` → `backend/.env` and fill secrets.
-- [ ] Run the pgvector migration in Supabase.
+- [ ] Build the schema: `cd backend; python -m alembic upgrade head`.
 - [ ] Run `scripts/embed_chunks.py` against the seeded `document_chunks`.
 - [ ] Verify `d.ready` documents exist for the learner's certifications.
+- [ ] Link a real login: `python scripts/link_user.py --email you@example.com`
+      (from `backend/`), or call `POST /users/me` with its token.
 - [ ] Start the merged API with `app.merged_main:app`.
-- [ ] Start `ui/merged_app.py` and exercise both modes.
-- [ ] Review `git status`; commit only when the receiving team is ready.
+- [ ] Start `ui/merged_app.py` and exercise both modes (local machine only).

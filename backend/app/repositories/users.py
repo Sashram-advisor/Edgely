@@ -64,12 +64,15 @@ async def upsert_user(
     auth_id: str,
     email: str,
     display_name: str,
+    refresh_email: bool = True,
 ) -> int:
     """Create the platform user if needed and return its id.
 
-    On conflict only ``email`` is refreshed. ``display_name`` is left alone so
-    a learner who renamed themselves does not get the fallback name back on the
-    next login. ``role`` is never taken from the token; new users are learners.
+    On conflict only ``email`` is refreshed, and only when ``refresh_email`` is
+    true: a login whose token carries no email must not replace a real address
+    with the placeholder. ``display_name`` is left alone so a learner who
+    renamed themselves does not get the fallback name back on the next login.
+    ``role`` is never taken from the token; new users are learners.
     """
 
     row = await fetch_one(
@@ -78,10 +81,11 @@ async def upsert_user(
         INSERT INTO users (external_auth_id, email, display_name, role)
         VALUES (:auth_id, :email, :display_name, 'learner')
         ON CONFLICT (external_auth_id)
-        DO UPDATE SET email = EXCLUDED.email
+        DO UPDATE SET email = CASE WHEN CAST(:refresh_email AS BOOLEAN)
+                                   THEN EXCLUDED.email ELSE users.email END
         RETURNING id
         """,
-        {"auth_id": auth_id, "email": email, "display_name": display_name},
+        {"auth_id": auth_id, "email": email, "display_name": display_name, "refresh_email": refresh_email},
     )
     if row is None:  # pragma: no cover - RETURNING always yields a row here
         raise RuntimeError("users upsert returned no id")

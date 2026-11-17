@@ -51,12 +51,18 @@ who the caller is; do not re-query `external_auth_id` in a route.
 
 ### `POST /users/me` — provision (idempotent)
 
-No request body is required. If sent, unknown fields are ignored (`user_id` in a
-body has no effect).
+The body is optional:
+
+| Field | Type | Notes |
+|---|---|---|
+| `display_name` | string, max 255, optional | Used only when the user is created. A later call never renames an existing user; use `PATCH /users/me`. |
+
+Unknown fields are ignored (`user_id` in a body has no effect).
 
 Provisioning runs in one transaction:
 
-1. `INSERT INTO users (...) ON CONFLICT (external_auth_id) DO UPDATE SET email = EXCLUDED.email RETURNING id`
+1. `INSERT INTO users (...) ON CONFLICT (external_auth_id) DO UPDATE SET email = ... RETURNING id`
+   - the stored email is refreshed only when the token carries one
 2. `INSERT INTO learner_profiles (user_id) ... ON CONFLICT (user_id) DO NOTHING`
 3. commit, then read the joined row
 
@@ -67,8 +73,9 @@ Rules:
 - A custom `display_name` is never overwritten by a later login.
 - `role` is always `learner` on creation; the token cannot set it.
 - If the token has no email, a deterministic placeholder
-  `<sub>@unknown.invalid` is stored (`users.email` is `NOT NULL`).
-- If the token has no name, the email local part is used.
+  `<sub>@unknown.invalid` is stored for a **new** user (`users.email` is
+  `NOT NULL`). An existing user's real email is never replaced by it.
+- Name of a new user: `display_name` from the body, else the email local part.
 
 Response `200`:
 
@@ -105,6 +112,8 @@ Body: any subset of the fields below. Unknown fields are rejected with `422`
 
 Omitted fields keep their current value (`exclude_unset`). An empty body is a
 no-op returning the current row. All changes are committed in one transaction.
+If the user has no `learner_profiles` row yet (for example a seeded user), it is
+created before the profile fields are written.
 
 Response `200`: the refreshed user object.
 `422`: validation failure. `403`: not provisioned.
@@ -124,8 +133,82 @@ No `updated_at` column exists in the schema; the API does not expose one.
 
 ---
 
+## Catalog and enrollment (Workstream B)
+
+Code: `routes/certifications.py`, `routes/enrollments.py`,
+`services/enrollment_service.py`. Errors use the same `{"detail": "..."}` shape.
+
+| Endpoint | Body | Success | Errors |
+|---|---|---|---|
+| `GET /certifications` | - | `200` list | `401` |
+| `GET /enrollments/me` | - | `200` list | `401`, `403` |
+| `POST /enrollments` | `certification_id`, `goal?`, `deadline?`, `weekly_study_hours?` | `201` enrollment | `401`, `403`, `409`, `422` |
+| `PATCH /enrollments/{id}` | `status?`, `goal?`, `deadline?`, `weekly_study_hours?` | `200` enrollment | `401`, `403`, `404`, `422` |
+
+`GET /certifications` needs a valid token but not a platform user, so a learner
+can browse before `POST /users/me`.
+
+### Certification object
+
+```json
+{ "id": 1, "name": "AWS Cloud Practitioner", "slug": "aws-ccp", "description": "..." }
+```
+
+Only `is_active` certifications are listed, ordered by name.
+
+### Enrollment object
+
+```json
+{
+  "id": 12,
+  "certification_id": 1,
+  "certification_name": "AWS Cloud Practitioner",
+  "certification_slug": "aws-ccp",
+  "status": "active",
+  "goal": "Pass in March",
+  "deadline": "2027-03-01",
+  "weekly_study_hours": 6.5,
+  "created_at": "2026-11-17T14:02:11"
+}
+```
+
+`GET /enrollments/me` returns all of the caller's enrollments, newest first,
+including completed and abandoned ones.
+
+### Fields
+
+| Field | Type | Notes |
+|---|---|---|
+| `certification_id` | integer > 0 | Must be an active certification, else `422` |
+| `status` | `active` \| `paused` \| `completed` \| `abandoned` | PATCH only; `null` is rejected |
+| `goal` | string, max 2000, or `null` | `null` clears it on PATCH |
+| `deadline` | `YYYY-MM-DD` or `null` | `null` clears it on PATCH |
+| `weekly_study_hours` | number > 0 and <= 168, 2 decimals, or `null` | `null` clears it on PATCH |
+
+Unknown fields are rejected with `422` (`user_id` in a body is never accepted).
+A new enrollment always starts as `active`.
+
+### Rules
+
+- **Status changes:** `active` <-> `paused`; `active` or `paused` ->
+  `completed` or `abandoned`. `completed` and `abandoned` are final - any PATCH
+  to them is `422`. To study the same certification again, `POST` a new
+  enrollment; the old row stays as history.
+- **One open enrollment per certification:** a second `active` or `paused`
+  enrollment for the same certification is `409`. It comes from the partial
+  unique index `enrollments_one_open_per_cert` (`INSERT ... ON CONFLICT DO
+  NOTHING`), not a read-then-write check.
+- **Weekly hours:** across the learner's open enrollments the total is at most
+  168. Over that is `422`; the database trigger
+  `enrollments_check_total_hours` is the backstop.
+- **Ownership:** another learner's enrollment id is `404`, never `403`, so ids
+  cannot be probed.
+- **Tutor scope:** the tutor only counts `active` enrollments. A learner whose
+  only enrollment is `paused` gets `403 NotEnrolled` from `/tutor/*`.
+
+---
+
 ## Out of scope for M1
 
 - Admin reads (`GET /users/{id}`), role management, account deletion.
 - Email/name synchronisation back to Supabase Auth.
-- Enrollment and certification endpoints (Workstream B).

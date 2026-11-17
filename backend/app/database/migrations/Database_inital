@@ -155,78 +155,154 @@ CREATE TABLE IF NOT EXISTS "progress" (
 COMMENT ON COLUMN "progress"."user_id" IS 'Composite Key';
 COMMENT ON COLUMN "progress"."exam_domain_id" IS 'Composite Key';
 
-ALTER TABLE "learner_profiles"
-ADD FOREIGN KEY("target_certification_id") REFERENCES "certifications"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "exam_domains"
-ADD FOREIGN KEY("certification_id") REFERENCES "certifications"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "exam_domains"
-ADD FOREIGN KEY("parent_id") REFERENCES "exam_domains"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "documents"
-ADD FOREIGN KEY("certification_id") REFERENCES "certifications"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "documents"
-ADD FOREIGN KEY("uploaded_by") REFERENCES "users"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "document_chunks"
-ADD FOREIGN KEY("document_id") REFERENCES "documents"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "document_chunks"
-ADD FOREIGN KEY("exam_domain_id") REFERENCES "exam_domains"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "conversations"
-ADD FOREIGN KEY("user_id") REFERENCES "users"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "conversations"
-ADD FOREIGN KEY("certification_id") REFERENCES "certifications"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "message_citations"
-ADD FOREIGN KEY("message_id") REFERENCES "messages"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "questions"
-ADD FOREIGN KEY("certification_id") REFERENCES "certifications"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "questions"
-ADD FOREIGN KEY("exam_domain_id") REFERENCES "exam_domains"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "question_sources"
-ADD FOREIGN KEY("question_id") REFERENCES "questions"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "question_sources"
-ADD FOREIGN KEY("chunk_id") REFERENCES "document_chunks"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "assessments"
-ADD FOREIGN KEY("user_id") REFERENCES "users"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "assessments"
-ADD FOREIGN KEY("certification_id") REFERENCES "certifications"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "attempts"
-ADD FOREIGN KEY("assessment_id") REFERENCES "assessments"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "attempts"
-ADD FOREIGN KEY("question_id") REFERENCES "questions"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "progress"
-ADD FOREIGN KEY("user_id") REFERENCES "users"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "progress"
-ADD FOREIGN KEY("exam_domain_id") REFERENCES "exam_domains"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "learner_profiles"
-ADD FOREIGN KEY("user_id") REFERENCES "users"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "message_citations"
-ADD FOREIGN KEY("chunk_id") REFERENCES "document_chunks"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "messages"
-ADD FOREIGN KEY("conversation_id") REFERENCES "conversations"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
-ALTER TABLE "attempts"
-ADD FOREIGN KEY("user_id") REFERENCES "users"("id")
-ON UPDATE NO ACTION ON DELETE NO ACTION;
+-- Foreign keys. Each one is added only if it is not there yet, so running this file
+-- again on an existing database is a no-op instead of failing halfway.
+-- The names match what Postgres generates for an unnamed key (<table>_<column>_fkey),
+-- so databases built from the old version of this file are recognised.
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'learner_profiles_target_certification_id_fkey' AND conrelid = '"learner_profiles"'::regclass) THEN
+		ALTER TABLE "learner_profiles" ADD CONSTRAINT "learner_profiles_target_certification_id_fkey"
+		FOREIGN KEY("target_certification_id") REFERENCES "certifications"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'exam_domains_certification_id_fkey' AND conrelid = '"exam_domains"'::regclass) THEN
+		ALTER TABLE "exam_domains" ADD CONSTRAINT "exam_domains_certification_id_fkey"
+		FOREIGN KEY("certification_id") REFERENCES "certifications"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'exam_domains_parent_id_fkey' AND conrelid = '"exam_domains"'::regclass) THEN
+		ALTER TABLE "exam_domains" ADD CONSTRAINT "exam_domains_parent_id_fkey"
+		FOREIGN KEY("parent_id") REFERENCES "exam_domains"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'documents_certification_id_fkey' AND conrelid = '"documents"'::regclass) THEN
+		ALTER TABLE "documents" ADD CONSTRAINT "documents_certification_id_fkey"
+		FOREIGN KEY("certification_id") REFERENCES "certifications"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'documents_uploaded_by_fkey' AND conrelid = '"documents"'::regclass) THEN
+		ALTER TABLE "documents" ADD CONSTRAINT "documents_uploaded_by_fkey"
+		FOREIGN KEY("uploaded_by") REFERENCES "users"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'document_chunks_document_id_fkey' AND conrelid = '"document_chunks"'::regclass) THEN
+		ALTER TABLE "document_chunks" ADD CONSTRAINT "document_chunks_document_id_fkey"
+		FOREIGN KEY("document_id") REFERENCES "documents"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'document_chunks_exam_domain_id_fkey' AND conrelid = '"document_chunks"'::regclass) THEN
+		ALTER TABLE "document_chunks" ADD CONSTRAINT "document_chunks_exam_domain_id_fkey"
+		FOREIGN KEY("exam_domain_id") REFERENCES "exam_domains"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'conversations_user_id_fkey' AND conrelid = '"conversations"'::regclass) THEN
+		ALTER TABLE "conversations" ADD CONSTRAINT "conversations_user_id_fkey"
+		FOREIGN KEY("user_id") REFERENCES "users"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'conversations_certification_id_fkey' AND conrelid = '"conversations"'::regclass) THEN
+		ALTER TABLE "conversations" ADD CONSTRAINT "conversations_certification_id_fkey"
+		FOREIGN KEY("certification_id") REFERENCES "certifications"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'message_citations_message_id_fkey' AND conrelid = '"message_citations"'::regclass) THEN
+		ALTER TABLE "message_citations" ADD CONSTRAINT "message_citations_message_id_fkey"
+		FOREIGN KEY("message_id") REFERENCES "messages"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'questions_certification_id_fkey' AND conrelid = '"questions"'::regclass) THEN
+		ALTER TABLE "questions" ADD CONSTRAINT "questions_certification_id_fkey"
+		FOREIGN KEY("certification_id") REFERENCES "certifications"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'questions_exam_domain_id_fkey' AND conrelid = '"questions"'::regclass) THEN
+		ALTER TABLE "questions" ADD CONSTRAINT "questions_exam_domain_id_fkey"
+		FOREIGN KEY("exam_domain_id") REFERENCES "exam_domains"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'question_sources_question_id_fkey' AND conrelid = '"question_sources"'::regclass) THEN
+		ALTER TABLE "question_sources" ADD CONSTRAINT "question_sources_question_id_fkey"
+		FOREIGN KEY("question_id") REFERENCES "questions"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'question_sources_chunk_id_fkey' AND conrelid = '"question_sources"'::regclass) THEN
+		ALTER TABLE "question_sources" ADD CONSTRAINT "question_sources_chunk_id_fkey"
+		FOREIGN KEY("chunk_id") REFERENCES "document_chunks"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'assessments_user_id_fkey' AND conrelid = '"assessments"'::regclass) THEN
+		ALTER TABLE "assessments" ADD CONSTRAINT "assessments_user_id_fkey"
+		FOREIGN KEY("user_id") REFERENCES "users"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'assessments_certification_id_fkey' AND conrelid = '"assessments"'::regclass) THEN
+		ALTER TABLE "assessments" ADD CONSTRAINT "assessments_certification_id_fkey"
+		FOREIGN KEY("certification_id") REFERENCES "certifications"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'attempts_assessment_id_fkey' AND conrelid = '"attempts"'::regclass) THEN
+		ALTER TABLE "attempts" ADD CONSTRAINT "attempts_assessment_id_fkey"
+		FOREIGN KEY("assessment_id") REFERENCES "assessments"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'attempts_question_id_fkey' AND conrelid = '"attempts"'::regclass) THEN
+		ALTER TABLE "attempts" ADD CONSTRAINT "attempts_question_id_fkey"
+		FOREIGN KEY("question_id") REFERENCES "questions"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'progress_user_id_fkey' AND conrelid = '"progress"'::regclass) THEN
+		ALTER TABLE "progress" ADD CONSTRAINT "progress_user_id_fkey"
+		FOREIGN KEY("user_id") REFERENCES "users"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'progress_exam_domain_id_fkey' AND conrelid = '"progress"'::regclass) THEN
+		ALTER TABLE "progress" ADD CONSTRAINT "progress_exam_domain_id_fkey"
+		FOREIGN KEY("exam_domain_id") REFERENCES "exam_domains"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'learner_profiles_user_id_fkey' AND conrelid = '"learner_profiles"'::regclass) THEN
+		ALTER TABLE "learner_profiles" ADD CONSTRAINT "learner_profiles_user_id_fkey"
+		FOREIGN KEY("user_id") REFERENCES "users"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'message_citations_chunk_id_fkey' AND conrelid = '"message_citations"'::regclass) THEN
+		ALTER TABLE "message_citations" ADD CONSTRAINT "message_citations_chunk_id_fkey"
+		FOREIGN KEY("chunk_id") REFERENCES "document_chunks"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'messages_conversation_id_fkey' AND conrelid = '"messages"'::regclass) THEN
+		ALTER TABLE "messages" ADD CONSTRAINT "messages_conversation_id_fkey"
+		FOREIGN KEY("conversation_id") REFERENCES "conversations"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
+DO $$ BEGIN
+	IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'attempts_user_id_fkey' AND conrelid = '"attempts"'::regclass) THEN
+		ALTER TABLE "attempts" ADD CONSTRAINT "attempts_user_id_fkey"
+		FOREIGN KEY("user_id") REFERENCES "users"("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+	END IF;
+END $$;
 
 
 -- Update for adding a new table : Enrollment, also fix a concern of cross certificate in combine weekly_study_hours

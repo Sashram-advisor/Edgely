@@ -33,9 +33,13 @@ def test_edgely_routes_are_still_present() -> None:
     assert "/openapi.json" in paths
 
 
-def test_ai_tutor_is_mounted() -> None:
+def test_ai_tutor_loads_but_legacy_mount_is_off_by_default() -> None:
+    # The unauthenticated /ai-tutor app is only mounted with APP_ENV=local AND
+    # ENABLE_LEGACY_TUTOR_MOUNT=true (P0-3); conftest.py sets neither flag.
+    # Both combinations are covered in test_tutor_startup.py.
     paths = _route_paths()
-    assert "/ai-tutor" in paths
+    assert "/ai-tutor" not in paths
+    assert "/tutor/chat" in set(app.openapi()["paths"])
     assert get_ai_tutor_app().title == "AI Tutor"
 
 
