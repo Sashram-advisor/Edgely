@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.db import check_connection, close_db
+from app.routes import certifications, enrollments
 from app.routes import users as users_routes
 
 
