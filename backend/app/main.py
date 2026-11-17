@@ -33,6 +33,8 @@ app.add_middleware(
 # Register routers here as they are built. Each router owns its own prefix and
 # tags so this file stays a thin composition root.
 app.include_router(users_routes.router)
+app.include_router(certifications.router)
+app.include_router(enrollments.router)
 
 
 @app.get("/health")
