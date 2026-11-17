@@ -7,47 +7,29 @@ Two layers:
   follows the same rules as the database (one open enrollment per
   certification, 168-hour weekly cap).
 
-* Database tests run only when EDGELY_TEST_DATABASE_URL points at an empty,
-  disposable Postgres database. They apply Database_inital into a throwaway
-  schema and check the real SQL: ON CONFLICT on the partial unique index, the
-  weekly-hours trigger, and the error mapping.
-
-      EDGELY_TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/edgely_test
-
-When the shared fixture in backend/tests/conftest.py lands, the environment
-setup and the database bootstrap below can move there.
+* Database tests use the shared ``run_db`` fixture from backend/tests/conftest.py
+  and are skipped unless EDGELY_TEST_DATABASE_URL points at an empty,
+  disposable Postgres database. They check the real SQL: ON CONFLICT on the
+  partial unique index, the weekly-hours trigger, and the error mapping.
 """
 
 from __future__ import annotations
 
-import asyncio
-import os
 import sys
-import uuid
 from datetime import date, datetime, timezone
 from decimal import Decimal
-from pathlib import Path
 
 import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
-BACKEND = Path(__file__).resolve().parents[2]
-
-# Dummy settings so app.core.config / app.core.db import without a real .env.
-os.environ.setdefault("DATABASE_URL", "postgresql://user:pass@127.0.0.1:5432/postgres")
-os.environ.setdefault("SUPABASE_URL", "https://example.supabase.co")
-if str(BACKEND) not in sys.path:
-    sys.path.insert(0, str(BACKEND))
-
-from fastapi import FastAPI  # noqa: E402
-from fastapi.testclient import TestClient  # noqa: E402
-
-from app.core.auth_provider import AuthenticatedUser, get_current_auth_user  # noqa: E402
-from app.core.db import get_db  # noqa: E402
-from app.repositories import enrollments as repo  # noqa: E402
-from app.routes import certifications as certifications_routes  # noqa: E402
-from app.routes import enrollments as enrollments_routes  # noqa: E402
-from app.schemas.enrollment import EnrollmentCreate, EnrollmentUpdate  # noqa: E402
-from app.services import enrollment_service  # noqa: E402
+from app.core.auth_provider import AuthenticatedUser, get_current_auth_user
+from app.core.db import get_db
+from app.repositories import enrollments as repo
+from app.routes import certifications as certifications_routes
+from app.routes import enrollments as enrollments_routes
+from app.schemas.enrollment import EnrollmentCreate, EnrollmentUpdate
+from app.services import enrollment_service
 
 USER = 7
 OTHER_USER = 8
@@ -427,78 +409,31 @@ def test_unknown_database_error_is_not_hidden(client: TestClient, monkeypatch: p
 # Real Postgres: the SQL itself
 # --------------------------------------------------------------------------
 
-TEST_DB_URL = os.environ.get("EDGELY_TEST_DATABASE_URL")
-SCHEMA_FILE = BACKEND / "app" / "database" / "migrations" / "Database_inital"
-
-needs_db = pytest.mark.skipif(not TEST_DB_URL, reason="set EDGELY_TEST_DATABASE_URL to run database tests")
-
-
-def _run(coro):
-    return asyncio.run(coro)
-
-
 @pytest.fixture
-def pg_session():
-    """A session on a fresh schema built from Database_inital, dropped afterwards."""
-    import asyncpg
-    from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+def pg_session(run_db, seed_sql):
+    """run_db from conftest.py, with two learners and three certifications loaded.
 
-    raw_url = TEST_DB_URL.replace("postgresql+asyncpg://", "postgresql://")
-    schema = f"test_{uuid.uuid4().hex[:12]}"
-
-    async def setup():
-        conn = await asyncpg.connect(raw_url)
-        try:
-            await conn.execute(f'CREATE SCHEMA "{schema}"')
-            await conn.execute(f'SET search_path TO "{schema}"')
-            await conn.execute(SCHEMA_FILE.read_text(encoding="utf-8"))
-            await conn.execute(
-                """
-                INSERT INTO users (id, external_auth_id, display_name, email, role) VALUES
-                    (7, 'auth-7', 'Learner Seven', 'seven@example.com', 'learner'),
-                    (8, 'auth-8', 'Learner Eight', 'eight@example.com', 'learner');
-                INSERT INTO certifications (id, name, slug, description, is_active) VALUES
-                    (1, 'AWS Cloud Practitioner', 'aws-ccp', 'Intro', true),
-                    (2, 'Azure Fundamentals', 'az-900', NULL, true),
-                    (3, 'Retired Cert', 'retired', NULL, false);
-                """
-            )
-        finally:
-            await conn.close()
-
-    async def teardown():
-        conn = await asyncpg.connect(raw_url)
-        try:
-            await conn.execute(f'DROP SCHEMA "{schema}" CASCADE')
-        finally:
-            await conn.close()
-
-    _run(setup())
-    url = raw_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    engine = create_async_engine(url, connect_args={"server_settings": {"search_path": schema}})
-
-    class Runner:
-        def __call__(self, fn):
-            async def go():
-                async with AsyncSession(engine, expire_on_commit=False) as session:
-                    return await fn(session)
-
-            return _run(go())
-
-    try:
-        yield Runner()
-    finally:
-        _run(engine.dispose())
-        _run(teardown())
+    Skipped automatically unless EDGELY_TEST_DATABASE_URL is set.
+    """
+    seed_sql(
+        """
+        INSERT INTO users (id, external_auth_id, display_name, email, role) VALUES
+            (7, 'auth-7', 'Learner Seven', 'seven@example.com', 'learner'),
+            (8, 'auth-8', 'Learner Eight', 'eight@example.com', 'learner');
+        INSERT INTO certifications (id, name, slug, description, is_active) VALUES
+            (1, 'AWS Cloud Practitioner', 'aws-ccp', 'Intro', true),
+            (2, 'Azure Fundamentals', 'az-900', NULL, true),
+            (3, 'Retired Cert', 'retired', NULL, false);
+        """
+    )
+    return run_db
 
 
-@needs_db
 def test_db_catalog_lists_only_active(pg_session) -> None:
     certs = pg_session(enrollment_service.list_certifications)
     assert [c["slug"] for c in certs] == ["aws-ccp", "az-900"]
 
 
-@needs_db
 def test_db_enroll_duplicate_and_reenroll(pg_session) -> None:
     from fastapi import HTTPException
 
@@ -523,7 +458,6 @@ def test_db_enroll_duplicate_and_reenroll(pg_session) -> None:
     assert {e["status"] for e in mine} == {"active", "completed"}
 
 
-@needs_db
 def test_db_raw_insert_conflict_returns_none(pg_session) -> None:
     """The ON CONFLICT target really matches the partial index (no exception, just no row)."""
 
@@ -538,7 +472,6 @@ def test_db_raw_insert_conflict_returns_none(pg_session) -> None:
     assert first is not None and second is None
 
 
-@needs_db
 def test_db_weekly_hours_trigger_maps_to_422(pg_session) -> None:
     """Bypass the service's own check so the database trigger has to catch it."""
     from fastapi import HTTPException
@@ -560,7 +493,6 @@ def test_db_weekly_hours_trigger_maps_to_422(pg_session) -> None:
     assert exc.value.status_code == 422
 
 
-@needs_db
 def test_db_patch_is_scoped_to_owner(pg_session) -> None:
     from fastapi import HTTPException
 
