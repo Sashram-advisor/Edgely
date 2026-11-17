@@ -116,3 +116,20 @@ def test_patch_rejects_null_display_name() -> None:
 def test_patch_rejects_out_of_range_study_hours() -> None:
     response = _client().patch("/users/me", json={"weekly_study_hours": 200})
     assert response.status_code == 422
+
+
+def test_provision_passes_display_name_from_body(monkeypatch) -> None:
+    seen: dict[str, str | None] = {}
+
+    async def fake_provision(db, auth_id, email=None, display_name=None):
+        seen["display_name"] = display_name
+        return _USER_ROW
+
+    monkeypatch.setattr(user_service, "provision_user", fake_provision)
+    app.dependency_overrides[get_current_auth_user] = lambda: AuthenticatedUser(auth_id="auth-abc", email=None)
+
+    assert _client().post("/users/me", json={"display_name": "Maya Chen"}).status_code == 200
+    assert seen["display_name"] == "Maya Chen"
+
+    assert _client().post("/users/me").status_code == 200  # the body stays optional
+    assert seen["display_name"] is None

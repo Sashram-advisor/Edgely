@@ -12,6 +12,16 @@
 streamlit run ui/merged_app.py
 ```
 
+**Course tutor** mode talks to the legacy, unauthenticated `/ai-tutor` mount.
+The API only mounts it when `backend/.env` has both:
+
+```
+APP_ENV=local
+ENABLE_LEGACY_TUTOR_MOUNT=true
+```
+
+Use this on your own machine only, never on a deployed server.
+
 Environment overrides:
 
 | Variable | Default |

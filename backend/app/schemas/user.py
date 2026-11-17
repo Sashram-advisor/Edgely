@@ -44,6 +44,19 @@ class UserRead(BaseModel):
     experience_level: str | None = None
 
 
+class UserProvision(BaseModel):
+    """Optional body of ``POST /users/me``.
+
+    ``display_name`` is used only when the user is created; a later call never
+    renames an existing user (use ``PATCH /users/me`` for that). Unknown fields
+    are ignored, so a stray ``user_id`` has no effect.
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    display_name: str | None = Field(default=None, max_length=255)
+
+
 class UserUpdate(BaseModel):
     """Fields a learner may change about themselves.
 

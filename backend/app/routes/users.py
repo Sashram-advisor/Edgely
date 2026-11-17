@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth_provider import AuthenticatedUser, get_current_auth_user
 from app.core.db import get_db
 from app.core.dependencies import current_user_id
-from app.schemas.user import UserRead, UserUpdate
+from app.schemas.user import UserProvision, UserRead, UserUpdate
 from app.services import user_service
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -33,6 +33,7 @@ router = APIRouter(prefix="/users", tags=["users"])
     summary="Create my platform user (idempotent)",
 )
 async def provision_me(
+    body: UserProvision | None = None,
     auth: AuthenticatedUser = Depends(get_current_auth_user),
     db: AsyncSession = Depends(get_db),
 ) -> UserRead:
@@ -42,9 +43,17 @@ async def provision_me(
     because on the very first call that dependency would raise 403 by design.
     Calling it again is safe: the upsert keys on ``external_auth_id`` and the
     learner profile insert is ``ON CONFLICT DO NOTHING``.
+
+    The body is optional. ``display_name`` names a new user; it never renames
+    an existing one.
     """
 
-    row = await user_service.provision_user(db, auth.auth_id, email=auth.email)
+    row = await user_service.provision_user(
+        db,
+        auth.auth_id,
+        email=auth.email,
+        display_name=body.display_name if body else None,
+    )
     return UserRead.model_validate(row)
 
 

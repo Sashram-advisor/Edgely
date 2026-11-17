@@ -67,7 +67,8 @@ async def provision_user(
         Exception: any database error is re-raised after a rollback.
     """
 
-    clean_email = (email or "").strip() or _fallback_email(auth_id)
+    token_email = (email or "").strip()
+    clean_email = token_email or _fallback_email(auth_id)
     clean_name = (display_name or "").strip() or _fallback_display_name(clean_email)
 
     try:
@@ -76,6 +77,8 @@ async def provision_user(
             auth_id=auth_id,
             email=clean_email,
             display_name=clean_name,
+            # Only a real email from the token may overwrite the stored one.
+            refresh_email=bool(token_email),
         )
         # Same transaction: a user is never visible without a learner profile.
         await users_repo.ensure_learner_profile(db, user_id)
@@ -123,6 +126,10 @@ async def update_user(
         if "display_name" in fields:
             await users_repo.update_display_name(db, user_id, fields["display_name"])
         if profile_values:
+            # Users created outside provision_user (seed data, hand-written SQL)
+            # may have no profile row; without it the UPDATE below would change
+            # nothing and still return 200.
+            await users_repo.ensure_learner_profile(db, user_id)
             await users_repo.update_learner_profile(db, user_id, profile_values)
         await db.commit()
     except Exception:
