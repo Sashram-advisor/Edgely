@@ -10,7 +10,8 @@ Run this instead of ``app.main:app`` to get the original Edgely API plus the AI 
 * ``/tutor/*`` are the authenticated tutor routes (backend/app/routes/tutor.py).
 * ``/ai-tutor/*`` is the tutor's own unauthenticated app. It is mounted only when APP_ENV=local AND
   ENABLE_LEGACY_TUTOR_MOUNT=true, because it trusts a user_id sent by the caller. The Streamlit dev UI uses it.
-* ``/local-tutor/*`` is the optional offline Ollama bridge.
+* ``/local-tutor/*`` is the optional offline Ollama bridge. It is also unauthenticated, so it is
+  mounted only when APP_ENV=local AND ENABLE_LOCAL_TUTOR_MOUNT=true.
 
 If the tutor cannot start (missing package or missing settings) Edgely still starts, the problem is
 logged, and ``/health/tutor`` reports it.
@@ -51,7 +52,11 @@ except Exception as exc:  # noqa: BLE001 - any failure must leave Edgely running
     tutor_error = f"{type(exc).__name__}: {exc}"
     log.exception("AI tutor is disabled")
 
-app.include_router(local_tutor_router, prefix="/local-tutor", tags=["local-tutor"])
+# --- Offline Ollama tutor: local-only, opt-in ------------------------------------------------
+# The local bridge has no authentication, so it is never mounted on a deployed server.
+# Same two-switch rule as /ai-tutor: APP_ENV=local AND ENABLE_LOCAL_TUTOR_MOUNT=true.
+if settings.local_tutor_mount_enabled:
+    app.include_router(local_tutor_router, prefix="/local-tutor", tags=["local-tutor"])
 
 
 @app.get("/health/tutor")
@@ -78,8 +83,9 @@ def merged_service_index() -> dict[str, object]:
         "tutor_health": "/health/tutor",
         "edgely_docs": "/docs",
         "tutor_enabled": tutor_ready,
-        "local_tutor_health": "/local-tutor/health",
     }
+    if settings.local_tutor_mount_enabled:
+        index["local_tutor_health"] = "/local-tutor/health"
     if tutor_ready:
         index["tutor_chat"] = "/tutor/chat"
         if settings.legacy_tutor_mount_enabled:
