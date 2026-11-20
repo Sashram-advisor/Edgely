@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     # at /ai-tutor only when BOTH conditions below are true: this flag is on and
     # the environment is local. Never enable it in a deployed environment.
     enable_legacy_tutor_mount: bool = False
+    # The offline Ollama bridge (app/integrations/local_tutor_api.py) also has
+    # no authentication. Mount it at /local-tutor only when BOTH this flag is on
+    # AND the environment is local — the same two-switch rule as /ai-tutor, so a
+    # misconfigured deployment (APP_ENV accidentally "local") still keeps it off.
+    enable_local_tutor_mount: bool = False
     app_name: str = "Sashram Agentic AI Certification Platform"
 
     # Supabase PostgreSQL connection string (never commit the real value).
@@ -89,6 +94,15 @@ class Settings(BaseSettings):
         index route cannot disagree about whether /ai-tutor is exposed.
         """
         return self.app_env == "local" and self.enable_legacy_tutor_mount
+
+    @property
+    def local_tutor_mount_enabled(self) -> bool:
+        """True only for a local run that explicitly opted into the offline tutor.
+
+        The offline bridge is unauthenticated, so it must never appear on a
+        deployed server even if APP_ENV is accidentally left at "local".
+        """
+        return self.app_env == "local" and self.enable_local_tutor_mount
 
     @field_validator("cors_origins", mode="before")
     @classmethod

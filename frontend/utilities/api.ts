@@ -1,10 +1,12 @@
-import type {
-  ForgotPasswordPayload,
-  LoginPayload,
-  MessageResponse,
-  RegisterPayload,
-  ResetPasswordPayload,
-} from "@/types/auth";
+// Typed client for the Edgely FastAPI backend.
+//
+// Every request attaches the current Supabase access token as
+// `Authorization: Bearer <token>` (A3). The backend verifies that token in
+// core/auth_provider.py and never trusts a user id sent from the browser.
+
+import { supabase } from "./supabase";
+import type { UserProfile } from "@/types/auth";
+import type { ChatDone } from "@/types/tutor";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -31,15 +33,22 @@ function extractMessage(body: unknown, fallback: string): string {
   return fallback;
 }
 
-async function post<T>(path: string, body: unknown): Promise<T> {
+async function authHeaders(): Promise<Record<string, string>> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`${API_URL}${path}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      // Lets the backend set an httpOnly session cookie.
-      credentials: "include",
-      body: JSON.stringify(body),
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        ...(await authHeaders()),
+        ...(init.headers ?? {}),
+      },
     });
   } catch {
     throw new ApiError(
@@ -59,12 +68,34 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   return data as T;
 }
 
-export const authApi = {
-  login: (payload: LoginPayload) => post<MessageResponse>("/auth/login", payload),
-  register: (payload: RegisterPayload) =>
-    post<MessageResponse>("/auth/register", payload),
-  forgotPassword: (payload: ForgotPasswordPayload) =>
-    post<MessageResponse>("/auth/forgot-password", payload),
-  resetPassword: (payload: ResetPasswordPayload) =>
-    post<MessageResponse>("/auth/reset-password", payload),
-};
+export function getJson<T>(path: string): Promise<T> {
+  return request<T>(path, { method: "GET" });
+}
+
+export function postJson<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, { method: "POST", body: JSON.stringify(body) });
+}
+
+// A4: POST /users/me provisions the platform user for the current login.
+// The route is idempotent (upsert on external_auth_id), so calling it on every
+// login is safe. `display_name` names a NEW user and is ignored on later calls.
+export async function ensurePlatformUser(displayName?: string): Promise<UserProfile> {
+  return postJson<UserProfile>(
+    "/users/me",
+    displayName ? { display_name: displayName } : {},
+  );
+}
+
+export async function getMyProfile(): Promise<UserProfile> {
+  return getJson<UserProfile>("/users/me");
+}
+
+// Non-streaming tutor call. The chat UI uses streamTutorChat (utilities/streaming.ts)
+// for the live typing experience; this stays available for quick checks.
+export async function tutorChat(body: {
+  message: string;
+  conversation_id?: number | null;
+  certification_id?: number | null;
+}): Promise<ChatDone> {
+  return postJson<ChatDone>("/tutor/chat", body);
+}
