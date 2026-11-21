@@ -38,6 +38,7 @@ function Icon({ name, size = 20, strokeWidth = 1.8 }: { name: IconName; size?: n
 
 const navigation: { label: string; href: string; icon: IconName }[] = [
   { label: "Overview", href: "/dashboard", icon: "grid" },
+  { label: "My Learning", href: "/my-learning", icon: "book" },
   { label: "AI Tutor", href: "/tutor", icon: "sparkle" },
   { label: "Study Plan", href: "/study-plan", icon: "calendar" },
   { label: "Practice", href: "/quiz", icon: "check" },
@@ -62,7 +63,11 @@ const activity = [
   { icon: "trophy" as IconName, title: "One-week learning streak", meta: "Achievement unlocked", time: "Oct 30", score: "7 days" },
 ];
 
-export default function Dashboard() {
+export default function Dashboard({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [mobileNav, setMobileNav] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -104,7 +109,9 @@ export default function Dashboard() {
 
       <div className={styles.mainColumn}>
         <header className={styles.topbar}>
-          <div className={styles.topbarLeft}><button className={styles.menuButton} onClick={() => setMobileNav(true)} aria-label="Open navigation"><Icon name="menu" /></button><span className={styles.breadcrumb}>My Workspace</span><span className={styles.breadcrumbSlash}>/</span><strong>Overview</strong></div>
+          <div className={styles.topbarLeft}><button className={styles.menuButton} onClick={() => setMobileNav(true)} aria-label="Open navigation"><Icon name="menu" /></button><span className={styles.breadcrumb}>My Workspace</span><span className={styles.breadcrumbSlash}>/</span><strong>
+          {pathname === "/my-learning" ? "My Learning" : "Overview"}
+            </strong></div>
           <div className={styles.topbarRight}>
             <span className={styles.todayBadge}><Icon name="calendar" size={15}/> November 2026</span>
             <div className={styles.notificationWrap}><button className={styles.iconButton} onClick={() => {setNotificationsOpen(!notificationsOpen);setAccountOpen(false);}} aria-expanded={notificationsOpen} aria-label="Notifications"><Icon name="bell" size={20}/>{!noticeRead && <span className={styles.noticeDot} />}</button>
@@ -115,6 +122,8 @@ export default function Dashboard() {
         </header>
 
         <main className={styles.content}>
+          {children ?? (
+  <>
           <section className={styles.intro} aria-label="Welcome">
             <div><div className={styles.eyebrow}><span className={styles.eyebrowLine}/> YOUR LEARNING SPACE</div><h1>Good to see you again <span className={styles.wave}>✳</span></h1><p>One step closer to the certification you&apos;re working toward.</p></div>
             <div className={styles.streak}><div className={styles.streakIcon}><Icon name="bolt" size={19}/></div><div><strong>7 day streak</strong><span>Keep your momentum!</span></div></div>
@@ -142,6 +151,8 @@ export default function Dashboard() {
             </div>
           </div>
           <footer className={styles.footer}><span>Edgely · Learn smarter. Certify faster.</span><span>Dashboard preview · Sample data</span></footer>
+        </>
+          )}
         </main>
       </div>
 
