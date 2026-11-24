@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { useState } from "react";
 import "./homepage.css";
+import SplashOverlay from "@/components/splash/SplashOverlay";
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <>
+<SplashOverlay />
+  
 <header className={menuOpen ? "site-header open" : "site-header"}>
 <a className="brand" href="#top" aria-label="Edgely home">
 <span className="brand-mark" aria-hidden="true">E</span>
