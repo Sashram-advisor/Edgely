@@ -43,13 +43,16 @@ def test_ai_tutor_loads_but_legacy_mount_is_off_by_default() -> None:
     assert get_ai_tutor_app().title == "AI Tutor"
 
 
-def test_local_tutor_routes_are_registered() -> None:
+def test_local_tutor_routes_are_off_by_default() -> None:
+    # O4/T5: /local-tutor is unauthenticated, so it needs APP_ENV=local AND
+    # ENABLE_LOCAL_TUTOR_MOUNT=true. conftest.py sets only APP_ENV=local, so the
+    # bridge must be absent here. (Before P1 this test asserted the opposite and
+    # broke once O4 gated the mount.) The opted-in case is covered in
+    # test_tutor_startup.py, in a fresh process.
     # FastAPI 0.162 represents an included router lazily in app.routes, so use
     # the generated OpenAPI document to observe the effective prefixed paths.
     paths = set(app.openapi()["paths"])
-    assert "/local-tutor/health" in paths
-    assert "/local-tutor/chat" in paths
-    assert "/local-tutor/material" in paths
+    assert not any(path.startswith("/local-tutor") for path in paths)
 
 
 def test_local_only_entrypoint_is_usable_without_edgely_database() -> None:

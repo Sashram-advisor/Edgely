@@ -15,6 +15,13 @@ Run this instead of ``app.main:app`` to get the original Edgely API plus the AI 
 
 If the tutor cannot start (missing package or missing settings) Edgely still starts, the problem is
 logged, and ``/health/tutor`` reports it.
+
+T5 (Team A, P1): with APP_ENV=production (or development) ``/tutor`` is the ONLY tutor surface.
+The two-switch rule above already keeps ``/ai-tutor`` and ``/local-tutor`` out; on top of that,
+``_assert_single_tutor_surface()`` at the bottom of this file inspects the routes that were
+actually registered and refuses to start if either unauthenticated surface slipped in
+(for example through a future edit of this file). Fail closed: a crash at startup is better
+than anonymous access to learner data.
 """
 
 from __future__ import annotations
@@ -91,3 +98,41 @@ def merged_service_index() -> dict[str, object]:
         if settings.legacy_tutor_mount_enabled:
             index["ai_tutor_dev_docs"] = "/ai-tutor/docs"
     return index
+
+
+# --- T5: only /tutor outside local development ----------------------------------------------
+# Path prefixes of the tutor surfaces that have NO authentication.
+UNAUTHENTICATED_TUTOR_PREFIXES = ("/ai-tutor", "/local-tutor")
+
+
+def registered_paths() -> set[str]:
+    """Every path the app will actually serve.
+
+    ``app.routes`` shows mounts (``/ai-tutor``); the OpenAPI document shows
+    included routers, which FastAPI 0.162 resolves lazily (``/local-tutor/...``).
+    Reading both covers both ways a surface can be attached.
+    """
+    paths = {getattr(route, "path", "") for route in app.routes}
+    paths |= set(app.openapi()["paths"])
+    # openapi() caches its result; clear it so the real schema is rebuilt on the
+    # first /openapi.json request and includes anything registered later.
+    app.openapi_schema = None
+    return paths
+
+
+def _assert_single_tutor_surface() -> None:
+    """Refuse to start a non-local server that exposes an unauthenticated tutor."""
+    if settings.app_env == "local":
+        return  # local developers may opt in to the legacy/offline tutors
+    leaked = sorted(
+        path for path in registered_paths() if path.startswith(UNAUTHENTICATED_TUTOR_PREFIXES)
+    )
+    if leaked:
+        raise RuntimeError(
+            f"APP_ENV={settings.app_env} must expose only /tutor, but unauthenticated tutor "
+            f"routes are registered: {leaked}. Remove them or run with APP_ENV=local."
+        )
+
+
+# Runs once at import time, after every router above has been registered.
+_assert_single_tutor_surface()

@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { streamTutorChat } from "@/utilities/streaming";
+import { streamTutorChat, TutorRequestError } from "@/utilities/streaming";
 import { supabase } from "@/utilities/supabase";
-import type { ChatDone, Citation } from "@/types/tutor";
+import type { ChatDone, Citation, TutorStreamError } from "@/types/tutor";
 import styles from "./TutorChat.module.css";
 
 type Message = {
@@ -15,6 +15,19 @@ type Message = {
 
 const EMPTY_STATE =
   "Ask me anything about your certification material. I’ll answer with citations to the study content.";
+
+// T3/T4: turn a structured tutor error into the one line shown above the composer.
+// For a rate limit (429) we add the wait time; for an in-stream failure we add
+// the short reference id so support can find the server log line.
+function describeError(error: TutorStreamError): string {
+  if (error.retryAfterSeconds) {
+    return `${error.message} (You can ask again in ${error.retryAfterSeconds} s.)`;
+  }
+  if (error.errorId) {
+    return `${error.message} (Reference: ${error.errorId.slice(0, 8)})`;
+  }
+  return error.message;
+}
 
 export default function TutorChat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -89,15 +102,21 @@ export default function TutorChat() {
               return next;
             });
           },
-          onError: (detail) => {
-            setError(detail);
+          // T3: in-stream failure; the backend sent a stable code, never exception text.
+          onError: (streamError) => {
+            setError(describeError(streamError));
           },
         },
         controller.signal,
       );
     } catch (err) {
+      // Failure before the stream started (network, 401/403/404/422, or T4's 429).
       setError(
-        err instanceof Error ? err.message : "The tutor didn’t respond. Try again.",
+        err instanceof TutorRequestError
+          ? describeError(err.info)
+          : err instanceof Error
+            ? err.message
+            : "The tutor didn’t respond. Try again.",
       );
       // Remove the empty assistant slot we reserved.
       setMessages((prev) =>

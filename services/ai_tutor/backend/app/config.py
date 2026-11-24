@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     chat_model: str = "claude-haiku-4-5"
     rewrite_model: str = "claude-haiku-4-5"
     max_answer_tokens: int = 1024
+    # T4: when to spend a second model call rewriting a follow-up into a standalone query.
+    #   always - every message that has history (the pre-T4 behaviour)
+    #   auto   - only when the message looks like a follow-up (see chat.needs_rewrite); default
+    #   off    - never; retrieval uses the raw message
+    rewrite_mode: Literal["always", "auto", "off"] = "auto"
 
     # Retrieval: relevant chunks score ~0.6-0.74 with Gemini, off-topic ~0.46. Tune with eval/run_eval.py.
     retrieval_k: int = 6
