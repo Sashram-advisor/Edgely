@@ -1,11 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getAccessToken } from "@/utilities/backend_client";
 import "./homepage.css";
 
 export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
+  // F4: a signed-in visitor gets a way back to their dashboard instead of "Log in".
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    getAccessToken().then((token) => { if (!cancelled) setSignedIn(Boolean(token)); });
+    return () => { cancelled = true; };
+  }, []);
   return (
     <>
 <header className={menuOpen ? "site-header open" : "site-header"}>
@@ -21,8 +29,14 @@ export default function HomePage() {
 <a href="#about">About</a>
 </nav>
 <div className="header-actions">
+{signedIn ? (
+<Link className="btn btn-dark btn-small" href="/dashboard">Dashboard</Link>
+) : (
+<>
 <Link className="text-link" href="/login">Log in</Link>
 <Link className="btn btn-dark btn-small" href="/register">Get started</Link>
+</>
+)}
 </div>
 </header>
 <main id="top">
