@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import Field from "./Field";
-import { ApiError, authApi } from "@/utilities/api";
+import { AuthError, sendPasswordResetEmail } from "@/utilities/authentication";
 import { validateEmail } from "@/utilities/validation";
 
 export default function ForgotPasswordForm() {
@@ -24,11 +24,12 @@ export default function ForgotPasswordForm() {
 
     setSubmitting(true);
     try {
-      await authApi.forgotPassword({ email: email.trim() });
+      // A1: Supabase sends the reset email with a link back to /reset-password.
+      await sendPasswordResetEmail(email.trim());
       setSentTo(email.trim());
     } catch (err) {
       setFormError(
-        err instanceof ApiError
+        err instanceof AuthError
           ? err.message
           : "Something went wrong. Please try again.",
       );

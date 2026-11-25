@@ -1,0 +1,437 @@
+.page {
+  --pine: #173b32;
+  --paper: #fffefa;
+  --accent: #def175;
+  --sea: #247d6c;
+  --soft: #eef5e9;
+  --line: #e4e9df;
+  --gray: #52675e;
+
+  display: grid;
+  gap: 22px;
+  align-content: start;
+  min-width: 0;
+  color: #17352e;
+  font-family: Inter, Arial, sans-serif;
+}
+
+.page * {
+  box-sizing: border-box;
+}
+
+.page :is(h1, h2, h3, p) {
+  margin: 0;
+}
+
+.page header h1,
+.hero h2 {
+  font-family: "Libre Baskerville", Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+.page header h1 {
+  margin: 6px 0;
+  font-size: 36px;
+}
+
+.page h3 {
+  font-size: 21px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.page p {
+  color: var(--gray);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.page small {
+  color: var(--sea);
+  font-size: 11px;
+}
+
+.page button {
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--soft);
+  color: var(--pine);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.page button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page :is(input, button):focus-visible {
+  outline: 3px solid #4c9788;
+  outline-offset: 3px;
+}
+
+.tabs,
+.filters,
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.tabs button {
+  background: transparent;
+}
+
+.tabs button[aria-pressed="true"],
+.page .lime {
+  background: var(--accent);
+}
+
+.filters button[aria-pressed="true"],
+.page .dark {
+  background: var(--pine);
+  color: white;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 28px;
+  border-radius: 18px;
+  background: var(--pine);
+  color: white;
+}
+
+.hero > div:not(.dial) {
+  flex: 1;
+}
+
+.hero h2 {
+  margin: 7px 0;
+  font-size: clamp(25px, 3vw, 34px);
+}
+
+.hero small {
+  color: var(--accent);
+}
+
+.hero p {
+  color: white;
+}
+
+.dial {
+  display: grid;
+  flex: none;
+  width: 90px;
+  aspect-ratio: 1;
+  padding: 5px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--accent) var(--angle),
+    var(--sea) 0
+  );
+}
+
+.dial div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--pine);
+}
+
+.dial strong {
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+.search,
+.course,
+.card,
+.calendar,
+.award {
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.search input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.course {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 28px;
+  padding: 24px;
+}
+
+.course h3,
+.award h3 {
+  margin: 8px 0;
+}
+
+.actions {
+  margin-top: 12px;
+}
+
+.tracker {
+  padding: 18px;
+  border: 1.5px solid var(--sea);
+  border-radius: 16px;
+  background: var(--soft);
+  font-size: 14px;
+}
+
+.segments {
+  display: flex;
+  gap: clamp(2px, 0.28vw, 4px);
+  margin: 14px 0;
+}
+
+.segments i {
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  border-radius: 8px;
+  background: #d5dfbf;
+}
+
+.segments i[data-done="true"] {
+  background: #338260;
+}
+
+.counts {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #21624b;
+  font-size: 13px;
+}
+
+.calendar,
+.award {
+  padding: 24px;
+  border-color: var(--sea);
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.days button {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  background: #f5f6f1;
+  text-align: left;
+}
+
+.days strong {
+  font-size: 23px;
+}
+
+.days span {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.days button[data-highlight="true"] {
+  background: var(--pine);
+  color: white;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.days button[data-highlight="true"] small {
+  color: var(--accent);
+}
+
+.planGrid,
+.finished {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.card {
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+}
+
+.session,
+.medal {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f5f6f1;
+}
+
+.session {
+  justify-content: space-between;
+}
+
+.session span,
+.medal div {
+  display: grid;
+  gap: 5px;
+}
+
+.session input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--sea);
+}
+
+.card progress {
+  width: 100%;
+  accent-color: var(--sea);
+}
+
+.finished {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.award {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+
+.medal {
+  width: 100%;
+  background: var(--soft);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: min(470px, 92vw);
+  max-height: 85vh;
+  margin: auto;
+  padding: 24px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  color: var(--pine);
+}
+
+.modal::backdrop {
+  background: #102a2490;
+}
+
+.modal header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.modal h2 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.modal ol {
+  margin-top: 14px;
+  padding-left: 24px;
+  list-style: decimal;
+}
+
+.modal form,
+.modal form > label {
+  display: grid;
+  gap: 10px;
+}
+
+.modal input[type="number"] {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.modal fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.modal fieldset input {
+  margin-right: 4px;
+}
+
+@media (max-width: 1000px) {
+  .course,
+  .planGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .days {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .page {
+    gap: 16px;
+  }
+
+  .hero {
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .hero > div:not(.dial) {
+    min-width: 175px;
+  }
+
+  .finished {
+    grid-template-columns: 1fr;
+  }
+
+  .course,
+  .calendar,
+  .card,
+  .award {
+    padding: 16px;
+  }
+
+  .tabs,
+  .filters {
+    gap: 4px;
+  }
+
+  .tabs button,
+  .filters button {
+    padding: 10px;
+  }
+}

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import Field from "./Field";
-import { ApiError, authApi } from "@/utilities/api";
+import { AuthError, signUp } from "@/utilities/authentication";
 import {
   PASSWORD_MIN_LENGTH,
   validateEmail,
@@ -24,6 +24,7 @@ export default function RegisterForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [pendingConfirmation, setPendingConfirmation] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,22 +40,44 @@ export default function RegisterForm() {
 
     setSubmitting(true);
     try {
-      await authApi.register({
-        full_name: name.trim(),
-        email: email.trim(),
+      // A1/A4: create the Supabase auth user (full name stored in user metadata),
+      // then provision the platform user when a session is available.
+      const { needsEmailConfirmation } = await signUp(
+        name.trim(),
+        email.trim(),
         password,
-      });
+      );
+      if (needsEmailConfirmation) {
+        setPendingConfirmation(email.trim());
+        setSubmitting(false);
+        return;
+      }
       router.push("/dashboard");
     } catch (error) {
       setFormError(
-        error instanceof ApiError && error.status === 409
-          ? "An account with this email already exists. Try logging in instead."
-          : error instanceof ApiError
-            ? error.message
-            : "Something went wrong. Please try again.",
+        error instanceof AuthError
+          ? error.message
+          : "Something went wrong. Please try again.",
       );
       setSubmitting(false);
     }
+  }
+
+  if (pendingConfirmation) {
+    return (
+      <>
+        <header className="auth-heading">
+          <h1>Confirm your email</h1>
+          <p>
+            We sent a confirmation link to <strong>{pendingConfirmation}</strong>.
+            Click it to activate your account, then log in.
+          </p>
+        </header>
+        <Link className="submit submit-link" href="/login">
+          Go to log in
+        </Link>
+      </>
+    );
   }
 
   return (

@@ -66,18 +66,42 @@ function primaryEnrollment(user: PlatformUser, enrollments: Enrollment[]): Enrol
   return active.find((e) => e.certification_id === user.target_certification_id) ?? active[0] ?? null;
 }
 
-const activityIcon: Record<Enrollment["status"], IconName> = {
-  active: "book",
-  paused: "clock",
-  completed: "trophy",
-  abandoned: "close",
-};
+const navigation: { label: string; href: string; icon: IconName }[] = [
+  { label: "Overview", href: "/dashboard", icon: "grid" },
+  { label: "My Learning", href: "/my-learning", icon: "book" },
+  { label: "AI Tutor", href: "/tutor", icon: "sparkle" },
+  { label: "Study Plan", href: "/study-plan", icon: "calendar" },
+  { label: "Practice", href: "/quiz", icon: "check" },
+  { label: "Progress", href: "/progress", icon: "chart" },
+];
 
-export default function Dashboard() {
-  const state = useApi(loadDashboard);
-  // null = today. Dates are only computed in the "ready" branch, which renders
-  // in the browser after the API answers, never during the build's prerender.
-  const [pickedDay, setSelectedDay] = useState<number | null>(null);
+const days = [
+  { day: "Mon", date: 2 }, { day: "Tue", date: 3 }, { day: "Wed", date: 4 },
+  { day: "Thu", date: 5 }, { day: "Fri", date: 6 }, { day: "Sat", date: 7 }, { day: "Sun", date: 8 },
+];
+
+const topics = [
+  { name: "Cloud Fundamentals", score: 86, color: "green" },
+  { name: "Security & Identity", score: 72, color: "green" },
+  { name: "Networking", score: 58, color: "amber" },
+  { name: "Cost Optimization", score: 43, color: "amber" },
+];
+
+const activity = [
+  { icon: "check" as IconName, title: "Cloud Architecture Practice", meta: "Practice quiz · 12 questions", time: "Today", score: "83%" },
+  { icon: "book" as IconName, title: "Introduction to IAM", meta: "Lesson completed", time: "Yesterday", score: "+40 XP" },
+  { icon: "trophy" as IconName, title: "One-week learning streak", meta: "Achievement unlocked", time: "Oct 30", score: "7 days" },
+];
+
+export default function Dashboard({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const [mobileNav, setMobileNav] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [goalOpen, setGoalOpen] = useState(false);
   const [draftHours, setDraftHours] = useState("");
   const [goalError, setGoalError] = useState<string | null>(null);

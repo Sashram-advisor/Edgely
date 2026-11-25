@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import Field from "./Field";
-import { ApiError, authApi } from "@/utilities/api";
+import { AuthError, signIn } from "@/utilities/authentication";
 import { validateEmail } from "@/utilities/validation";
 
 export default function LoginForm() {
@@ -32,15 +32,15 @@ export default function LoginForm() {
 
     setSubmitting(true);
     try {
-      await authApi.login({ email: email.trim(), password });
+      // A1/A4: sign in through Supabase Auth, then provision the platform user
+      // (POST /users/me) before entering the app.
+      await signIn(email.trim(), password);
       router.push("/dashboard");
     } catch (error) {
       setFormError(
-        error instanceof ApiError && error.status === 401
-          ? "That email and password don’t match. Check them and try again."
-          : error instanceof ApiError
-            ? error.message
-            : "Something went wrong. Please try again.",
+        error instanceof AuthError
+          ? error.message
+          : "Something went wrong. Please try again.",
       );
       setSubmitting(false);
     }

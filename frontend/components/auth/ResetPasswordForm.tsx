@@ -1,41 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import Field from "./Field";
-import { ApiError, authApi } from "@/utilities/api";
+import { AuthError, resetPassword } from "@/utilities/authentication";
 import { PASSWORD_MIN_LENGTH, validateNewPassword } from "@/utilities/validation";
 
 type Errors = { password?: string; confirm?: string };
 
 export default function ResetPasswordForm() {
   const router = useRouter();
-  const token = useSearchParams().get("token") ?? "";
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  if (!token) {
-    return (
-      <>
-        <header className="auth-heading">
-          <h1>This link isn’t valid</h1>
-          <p>
-            The reset link is missing or incomplete. Request a new one and use
-            the link in the latest email.
-          </p>
-        </header>
-        <Link className="submit submit-link" href="/forgot-password">
-          Request a new link
-        </Link>
-      </>
-    );
-  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -50,15 +32,15 @@ export default function ResetPasswordForm() {
 
     setSubmitting(true);
     try {
-      await authApi.resetPassword({ token, password });
+      // A1: the Supabase client auto-detects the recovery token in the URL hash
+      // and establishes a session; updateUser changes the password for it.
+      await resetPassword(password);
       router.push("/login?reset=1");
     } catch (error) {
       setFormError(
-        error instanceof ApiError && (error.status === 400 || error.status === 410)
-          ? "This reset link has expired or was already used. Request a new one."
-          : error instanceof ApiError
-            ? error.message
-            : "Something went wrong. Please try again.",
+        error instanceof AuthError
+          ? error.message
+          : "Something went wrong. Please try again.",
       );
       setSubmitting(false);
     }
