@@ -26,6 +26,10 @@ def _client_logged_in_as(auth_id: str) -> TestClient:
 
 def teardown_function() -> None:
     app.dependency_overrides.clear()
+    # T4: these tests share user id 7; reset the rate limiter so they never hit 429.
+    from app.core.rate_limit import tutor_limiter
+
+    tutor_limiter.reset()
 
 
 def test_tutor_routes_registered() -> None:

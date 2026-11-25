@@ -2,9 +2,18 @@
 
 prepare_turn() does everything that can fail before we pay for generation (404/403s happen here).
 stream_turn() streams the answer and persists it once complete. chat_turn() is the non-streaming wrapper.
+
+T4 (Team A, P1):
+* The query-rewrite call is skipped when the message does not look like a follow-up
+  (needs_rewrite, controlled by REWRITE_MODE), so most turns make one model call, not two.
+* Token usage of BOTH calls is recorded per turn: the assistant message row stores the
+  turn total in tokens_in / tokens_out, the `done` payload breaks it down, and one
+  structured log line per turn is written to the "edgely.tutor.usage" logger.
 """
+import logging
+import re
 from collections.abc import Iterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 
 import anthropic
@@ -14,6 +23,8 @@ from .config import get_settings
 from .context import LearnerContext, load_learner_context
 from .db import get_db
 from .retrieval import retrieve
+
+usage_log = logging.getLogger("edgely.tutor.usage")
 
 
 class ConversationNotFound(Exception):
@@ -42,6 +53,18 @@ class PreparedTurn:
     domain_names: dict[int, str]
     system: list[dict]
     messages: list[dict]
+    # T4: tokens spent by the rewrite call (both 0 when the rewrite was skipped).
+    rewrite_usage: "RewriteUsage" = field(default_factory=lambda: RewriteUsage())
+    user_id: int | None = None
+
+
+@dataclass
+class RewriteUsage:
+    """Token counts of the optional query-rewrite call (T4)."""
+
+    input_tokens: int = 0
+    output_tokens: int = 0
+    called: bool = False
 
 
 @lru_cache
@@ -107,8 +130,53 @@ def load_history(conversation_id: int, limit: int) -> list[dict]:
 
 # --- Step 4: rewrite -----------------------------------------------------------------------------
 
-def rewrite_query(history: list[dict], message: str) -> str:
-    """Turn a follow-up ("what about Glacier?") into a standalone question for retrieval."""
+# Words that usually point back at something said earlier in the conversation.
+# If a message contains one of these, retrieval on the raw text would probably
+# miss the real topic, so it is worth paying for a rewrite.
+_FOLLOW_UP_WORDS = {
+    "it", "its", "it's", "this", "that", "these", "those", "they", "them", "their",
+    "he", "she", "him", "her", "one", "ones", "above", "previous", "earlier", "same",
+    "else", "more", "again", "also", "instead", "former", "latter",
+}
+# Openings that are follow-ups even without a pronoun ("what about Glacier?", "and S3?").
+_FOLLOW_UP_OPENINGS = ("what about", "how about", "and ", "but ", "or ", "why not", "then ", "so ")
+# A message this short is rarely a full question on its own ("why?", "example please").
+_MIN_STANDALONE_WORDS = 5
+_WORD_RE = re.compile(r"[a-z']+")
+
+
+def needs_rewrite(history: list[dict], message: str, mode: str = "auto") -> bool:
+    """Decide whether the extra rewrite model call is worth it (T4).
+
+    Pure function (no I/O) so it is easy to unit-test.
+
+    * No history -> never: there is nothing to resolve (this was already true before T4).
+    * mode "off" -> never.  mode "always" -> whenever there is history.
+    * mode "auto" -> only when the message looks like a follow-up: very short,
+      starts like "what about ...", or contains a back-referencing word.
+
+    The heuristic errs on the side of rewriting: a false "yes" costs one cheap
+    call (the pre-T4 behaviour); a false "no" could hurt retrieval quality.
+    """
+    if not history or mode == "off":
+        return False
+    if mode == "always":
+        return True
+    text = message.strip().lower()
+    words = _WORD_RE.findall(text)
+    if len(words) < _MIN_STANDALONE_WORDS:
+        return True
+    if text.startswith(_FOLLOW_UP_OPENINGS):
+        return True
+    return any(word in _FOLLOW_UP_WORDS for word in words)
+
+
+def rewrite_query(history: list[dict], message: str, usage: RewriteUsage | None = None) -> str:
+    """Turn a follow-up ("what about Glacier?") into a standalone question for retrieval.
+
+    T4: when ``usage`` is given, the rewrite call's token counts are written into
+    it, so the turn can record what it really cost.
+    """
     if not history:
         return message
     transcript = "\n".join(f"{m['role']}: {m['content']}" for m in history[-6:])
@@ -123,6 +191,10 @@ def rewrite_query(history: list[dict], message: str) -> str:
             }
         ],
     )
+    if usage is not None:
+        usage.called = True
+        usage.input_tokens = resp.usage.input_tokens
+        usage.output_tokens = resp.usage.output_tokens
     text = "".join(b.text for b in resp.content if b.type == "text").strip()
     return text or message
 
@@ -141,7 +213,12 @@ def prepare_turn(req: ChatRequest) -> PreparedTurn:
         conversation_id = _create_conversation(req.user_id, cert_ids, req.message)
         history = []
 
-    standalone = rewrite_query(history, req.message)                            # 4
+    # 4. T4: only pay for the rewrite call when the message looks like a follow-up.
+    rewrite_usage = RewriteUsage()
+    if needs_rewrite(history, req.message, s.rewrite_mode):
+        standalone = rewrite_query(history, req.message, rewrite_usage)
+    else:
+        standalone = req.message
     sources = retrieve(standalone, cert_ids)                                    # 5
 
     domain_ids = list({c["exam_domain_id"] for c in sources if c["exam_domain_id"]})
@@ -160,6 +237,8 @@ def prepare_turn(req: ChatRequest) -> PreparedTurn:
         domain_names=domain_names,
         system=prompt.system_blocks(ctx, cert_ids),
         messages=history + [{"role": "user", "content": prompt.user_turn(req.message, sources, domain_names)}],
+        rewrite_usage=rewrite_usage,
+        user_id=req.user_id,
     )
 
 
@@ -186,7 +265,15 @@ def _citation_payload(prep: PreparedTurn, cited: list[int]) -> list[dict]:
 def _persist(prep: PreparedTurn, answer: str, model: str, usage: anthropic.types.Usage, citations: list[dict]) -> int:
     db = get_db()
     # Count cached prompt tokens too, so tokens_in reflects the full prompt size.
-    tokens_in = usage.input_tokens + (usage.cache_creation_input_tokens or 0) + (usage.cache_read_input_tokens or 0)
+    # T4: add the rewrite call's tokens, so the assistant row records the cost of the
+    # whole turn (answer + rewrite), not only the answer call.
+    tokens_in = (
+        usage.input_tokens
+        + (usage.cache_creation_input_tokens or 0)
+        + (usage.cache_read_input_tokens or 0)
+        + prep.rewrite_usage.input_tokens
+    )
+    tokens_out = usage.output_tokens + prep.rewrite_usage.output_tokens
     # One insert, so both rows share created_at; ids keep them in order.
     rows = (
         db.table("messages")
@@ -199,7 +286,7 @@ def _persist(prep: PreparedTurn, answer: str, model: str, usage: anthropic.types
                     "content": answer,
                     "model": model,
                     "tokens_in": tokens_in,
-                    "tokens_out": usage.output_tokens,
+                    "tokens_out": tokens_out,
                 },
             ]
         )
@@ -236,17 +323,51 @@ def stream_turn(prep: PreparedTurn) -> Iterator[tuple[str, object]]:
 
     citations = _citation_payload(prep, prompt.cited_source_indexes(answer, len(prep.sources)))
     message_id = _persist(prep, answer, final.model, final.usage, citations)
+    usage = _turn_usage(prep, final.usage)
+    # T4: one structured line per turn, so cost per user can be summed from the logs
+    # even before a metrics system exists (L8).
+    usage_log.info(
+        "tutor turn user_id=%s conversation_id=%s message_id=%s model=%s rewrite_called=%s "
+        "answer_in=%s answer_out=%s rewrite_in=%s rewrite_out=%s total_in=%s total_out=%s",
+        prep.user_id,
+        prep.conversation_id,
+        message_id,
+        final.model,
+        prep.rewrite_usage.called,
+        usage["input_tokens"],
+        usage["output_tokens"],
+        usage["rewrite_input_tokens"],
+        usage["rewrite_output_tokens"],
+        usage["total_input_tokens"],
+        usage["total_output_tokens"],
+    )
     yield "done", {
         "conversation_id": prep.conversation_id,
         "message_id": message_id,
         "answer": answer,
         "standalone_query": prep.standalone_query,
         "citations": citations,
-        "usage": {
-            "input_tokens": final.usage.input_tokens,
-            "output_tokens": final.usage.output_tokens,
-            "cache_read_input_tokens": final.usage.cache_read_input_tokens,
-        },
+        "usage": usage,
+    }
+
+
+def _turn_usage(prep: PreparedTurn, answer_usage: anthropic.types.Usage) -> dict:
+    """Token breakdown for the `done` event (T4).
+
+    The first three keys are unchanged from before T4, so existing clients keep
+    working. The new keys add the rewrite call and the turn totals; the totals
+    equal what _persist stores in messages.tokens_in / tokens_out.
+    """
+    cache_read = answer_usage.cache_read_input_tokens or 0
+    cache_write = answer_usage.cache_creation_input_tokens or 0
+    return {
+        "input_tokens": answer_usage.input_tokens,
+        "output_tokens": answer_usage.output_tokens,
+        "cache_read_input_tokens": cache_read,
+        "rewrite_input_tokens": prep.rewrite_usage.input_tokens,
+        "rewrite_output_tokens": prep.rewrite_usage.output_tokens,
+        "total_input_tokens": answer_usage.input_tokens + cache_read + cache_write + prep.rewrite_usage.input_tokens,
+        "total_output_tokens": answer_usage.output_tokens + prep.rewrite_usage.output_tokens,
     }
 
 

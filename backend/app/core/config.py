@@ -50,6 +50,12 @@ class Settings(BaseSettings):
     # Supabase's pooler rejects prepared statements. 0 turns that cache off.
     db_statement_cache_size: int = 0
 
+    # T4: per-learner limit on tutor questions (core/rate_limit.py).
+    # Accepted questions per rolling minute / rolling 24 hours. 0 turns a window off.
+    # The counters live in process memory: with N workers the real limit is N x these.
+    tutor_rate_limit_per_minute: int = Field(default=10, ge=0)
+    tutor_rate_limit_per_day: int = Field(default=200, ge=0)
+
     # Supabase Auth (used by core/auth_provider.py to verify login tokens)
     supabase_url: str | None = None
     # Only needed if your project signs tokens with the older shared secret (HS256).

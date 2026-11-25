@@ -2,11 +2,16 @@
 
 The learner is identified from the verified login token, never from the request body.
 The tutor logic itself still lives in services/ai_tutor and is called, not copied.
+
+P1 changes (Team A):
+* T3 - the stream's ``error`` event no longer contains exception text. It carries a
+  stable code instead (core/tutor_sse.py; contract in docs/api/tutor-sse.md).
+* T4 - ``/chat`` and ``/chat/stream`` are rate-limited per learner
+  (core/rate_limit.py): too many questions -> 429 with a Retry-After header.
 """
 
 from __future__ import annotations
 
-import json
 from contextlib import contextmanager
 from dataclasses import asdict
 
@@ -15,6 +20,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.core.dependencies import current_user_id
+from app.core.rate_limit import enforce_tutor_rate_limit
+from app.core.tutor_sse import EVENT_DELTA, EVENT_META, error_event_for, format_event
 from app.integrations.ai_tutor_mount import get_ai_tutor_app
 
 router = APIRouter()
@@ -48,37 +55,49 @@ class ChatBody(BaseModel):
     certification_id: int | None = None
 
 
-def _sse(event: str, data: dict) -> str:
-    return f"event: {event}\ndata: {json.dumps(data)}\n\n"
-
-
 # These are plain `def` routes on purpose: FastAPI runs them in a worker thread,
 # which suits the tutor's blocking Supabase and Claude clients.
 
 
 @router.post("/chat")
-def chat(body: ChatBody, user_id: int = Depends(current_user_id)) -> dict:
+def chat(body: ChatBody, user_id: int = Depends(enforce_tutor_rate_limit)) -> dict:
+    # enforce_tutor_rate_limit (T4) resolves the verified user id AND counts this
+    # question against the learner's limit; it raises 429 before any model call.
     tutor_chat, _, _ = _tutor()
     with tutor_errors():
         return tutor_chat.chat_turn(tutor_chat.ChatRequest(user_id=user_id, **body.model_dump()))
 
 
 @router.post("/chat/stream")
-def chat_stream(body: ChatBody, user_id: int = Depends(current_user_id)) -> StreamingResponse:
+def chat_stream(body: ChatBody, user_id: int = Depends(enforce_tutor_rate_limit)) -> StreamingResponse:
+    """Stream one tutor answer as Server-Sent Events.
+
+    Wire format (docs/api/tutor-sse.md): ``meta`` once, ``delta`` 0..n times,
+    then exactly one of ``done`` or ``error``. Failures that happen *before* the
+    stream starts (401/403/404/422/429) are ordinary HTTP errors.
+    """
     tutor_chat, _, _ = _tutor()
     with tutor_errors():
         # Prepare first so 403/404 come back as normal HTTP errors before streaming starts.
         prep = tutor_chat.prepare_turn(tutor_chat.ChatRequest(user_id=user_id, **body.model_dump()))
 
     def events():
-        yield _sse("meta", {"conversation_id": prep.conversation_id, "standalone_query": prep.standalone_query})
+        yield format_event(EVENT_META, {"conversation_id": prep.conversation_id, "standalone_query": prep.standalone_query})
         try:
             for kind, payload in tutor_chat.stream_turn(prep):
-                yield _sse(kind, {"text": payload} if kind == "delta" else payload)
-        except Exception as exc:  # headers are already sent, so report the failure in the stream
-            yield _sse("error", {"detail": str(exc)})
+                # stream_turn yields ("delta", str) and finally ("done", dict).
+                yield format_event(kind, {"text": payload} if kind == EVENT_DELTA else payload)
+        except Exception as exc:  # noqa: BLE001 - headers are already sent, so report in-band
+            # T3: log the real exception server-side; send only a stable code to the client.
+            yield error_event_for(exc, user_id=user_id, conversation_id=prep.conversation_id)
 
-    return StreamingResponse(events(), media_type="text/event-stream")
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        # Stop proxies (nginx, some CDNs) from buffering the whole answer, which
+        # would turn the live stream into one late response.
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.get("/me/context")

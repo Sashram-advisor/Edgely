@@ -29,6 +29,10 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # T4: browsers hide non-safelisted response headers from cross-origin JS.
+    # The frontend (localhost:3000) must read these two on a 429 to show
+    # "try again in N seconds".
+    expose_headers=["Retry-After", "X-Error-Code"],
 )
 
 # Register routers here as they are built. Each router owns its own prefix and

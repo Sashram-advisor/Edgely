@@ -6,12 +6,17 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import Field from "./Field";
 import { AuthError, signIn } from "@/utilities/authentication";
+import { safeNextPath } from "@/utilities/redirect";
 import { validateEmail } from "@/utilities/validation";
 
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const justReset = searchParams.get("reset") === "1";
+  // A5: the route guard sends visitors here as /login?next=<page>. After login
+  // we return them to that page. safeNextPath() drops anything that is not a
+  // same-site path, so `next` cannot be used as an open redirect.
+  const nextPath = safeNextPath(searchParams.get("next"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +40,8 @@ export default function LoginForm() {
       // A1/A4: sign in through Supabase Auth, then provision the platform user
       // (POST /users/me) before entering the app.
       await signIn(email.trim(), password);
-      router.push("/dashboard");
+      // A5: go back to the guarded page the user asked for (default /dashboard).
+      router.push(nextPath);
     } catch (error) {
       setFormError(
         error instanceof AuthError
